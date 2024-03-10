@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  maria :
+    image: docker.io/bitnami/mariadb:10.6
+    container_name: re_search_mariadb
+    ports:
+      - 3306:3306
+    volumes:
+      - ~/docker/mariadb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
+      - ~/docker/mariadb/var/lib/mysql:/var/lib/mysql
+      - ~/docker/mariadb/var/log/maria:/var/log/maria
+    environment:
+      - TZ="Asia/Seoul"
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_USER=admin
+      - MARIADB_ROOT_PASSWORD=admin
+      - MARIADB_DATABASE=re_search
+      - MARIADB_PASSWORD=admin
+    networks:
+      - backend
+    restart: always
+
+networks:
+  backend:
