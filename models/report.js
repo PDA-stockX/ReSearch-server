@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
         refPrice: DataTypes.INTEGER,
         targetPrice: DataTypes.INTEGER,
         returnRate: DataTypes.FLOAT,
-        achievementRate: DataTypes.FLOAT
+        achievementScore: DataTypes.FLOAT
     }, {
         sequelize,
         modelName: 'Report',
