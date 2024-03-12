@@ -41,7 +41,7 @@ module.exports = {
       returnRate: {
         type: Sequelize.FLOAT
       },
-      achievementRate: {
+      achievementScore: {
         type: Sequelize.FLOAT
       },
       createdAt: {
