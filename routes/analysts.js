@@ -59,7 +59,7 @@ async function updateAnalystRates() {
 
 
 // 애널리스트 수익률 순위 조회 : /api/analysts/earning-rate
-router.get('/', async (req, res, next) => {
+router.get('/earning-rate', async (req, res, next) => {
 
     try {
         // 오늘 날짜
@@ -70,7 +70,7 @@ router.get('/', async (req, res, next) => {
 
         // Analyst 테이블에서 name, firm, returnRate, achievementRate 가져오기
         const analystData = await models.Analyst.findAll({
-            attributes: ['id', 'name', 'firm', 'returnRate', 'achievementRate'],
+            attributes: ['id', 'name', 'firm', 'returnRate'],
         });
 
         // Analyst 별 업종명 배열 가져오기
@@ -94,7 +94,14 @@ router.get('/', async (req, res, next) => {
             if (!analystSectorMap[analystId]) {
                 analystSectorMap[analystId] = [];
             }
-            analystSectorMap[analystId].push(report.ReportSectors.map((rs) => rs.Sector.name));
+            
+            analystSectorMap[analystId].push(
+                ...Array.from(new Set(report.ReportSectors.map((rs) => rs.Sector.name)))
+            );
+        });
+
+        Object.keys(analystSectorMap).forEach((analystId) => {
+            analystSectorMap[analystId] = Array.from(new Set(analystSectorMap[analystId]));
         });
 
         // Analyst에 대한 정보 정렬하기
@@ -103,7 +110,6 @@ router.get('/', async (req, res, next) => {
             name: analyst.name,
             firm: analyst.firm,
             returnRate: analyst.returnRate,
-            achievementRate: analyst.achievementRate,
             sectorNames: analystSectorMap[analyst.id] || [],
         }));
 
@@ -120,7 +126,70 @@ router.get('/', async (req, res, next) => {
 
 
 // 애널리스트 달성률 순위 조회 : /api/analysts/achievement-rate
+router.get('/achievement-rate', async (req, res, next) => {
 
+    try {
+        // 오늘 날짜
+        const today = new Date();
+
+        // updateAnalystRates 함수 호출
+        await updateAnalystRates();
+
+        // Analyst 테이블에서 name, firm, achievementRate 가져오기
+        const analystData = await models.Analyst.findAll({
+            attributes: ['id', 'name', 'firm', 'achievementRate'],
+        });
+
+        // Analyst 별 업종명 배열 가져오기
+        const analystSectors = await models.Report.findAll({
+            attributes: ['analystId'],
+            include: {
+                model: models.ReportSector,
+                attributes: [],
+                include: {
+                    model: models.Sector,
+                    attributes: ['name'],
+                },
+            },
+            raw: true,
+            nest: true,
+        });
+
+        const analystSectorMap = {};
+        analystSectors.forEach((report) => {
+            const analystId = report.analystId;
+            if (!analystSectorMap[analystId]) {
+                analystSectorMap[analystId] = [];
+            }
+            
+            analystSectorMap[analystId].push(
+                ...Array.from(new Set(report.ReportSectors.map((rs) => rs.Sector.name)))
+            );
+        });
+
+        Object.keys(analystSectorMap).forEach((analystId) => {
+            analystSectorMap[analystId] = Array.from(new Set(analystSectorMap[analystId]));
+        });
+
+        // Analyst에 대한 정보 정렬하기
+        const sortedAnalystData = analystData.map((analyst) => ({
+            id: analyst.id,
+            name: analyst.name,
+            firm: analyst.firm,
+            achievementRate: analyst.achievementRate,
+            sectorNames: analystSectorMap[analyst.id] || [],
+        }));
+
+        // Analyst returnRate로 내림차순 정렬해서 return
+        const sortedAnalystRankings = sortedAnalystData.sort((a, b) => b.returnRate - a.returnRate);
+
+        res.json(sortedAnalystRankings);
+        
+    } catch (err) {
+        console.error('Error retrieving analyst data:', err);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
 
 
 // 업종별 애널리스트 순위 조회 : /api/analysts?sector={업종명}
