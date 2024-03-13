@@ -13,6 +13,11 @@ async function updateAnalystRates() {
 
         // Analyst 별로 업데이트 수행
         for (const analyst of analysts) {
+            // 이미 값이 있는 경우에는 계산하지 않음
+            if (analyst.returnRate !== null && analyst.achievementRate !== null) {
+                continue;
+            }
+
             // Analyst의 id에 해당하는 Report 데이터 가져오기
             const reports = await models.Report.findAll({
                 where: {
