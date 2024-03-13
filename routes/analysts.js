@@ -124,7 +124,6 @@ async function getAnalystRankings(orderBy, res) {
 }
 
 
-
 // 애널리스트 수익률 순위 조회 : /api/analysts/earning-rate
 router.get('/earning-rate', async (req, res, next) => {
     await getAnalystRankings('returnRate', res);
@@ -138,6 +137,62 @@ router.get('/achievement-rate', async (req, res, next) => {
 
 
 // 업종별 애널리스트 순위 조회 : /api/analysts?sector={업종명}
+router.get('/', async (req, res, next) => {
+    try {
+        // 받은 업종명
+        const sectorName = req.query.sector;
+
+        if (!sectorName) {
+            return res.status(400).json({ message: '업종명을 제공해야 합니다.' });
+        }
+
+        // 오늘 날짜
+        const today = new Date();
+
+        // updateAnalystRates 함수 호출
+        await updateAnalystRates();
+
+        // 특정 업종에 속한 애널리스트들의 리포트 가져오기
+        const reports = await models.Report.findAll({
+            include: [
+                {
+                    model: models.ReportSector,
+                    attributes: [],
+                    include: {
+                        model: models.Sector,
+                        attributes: ['name'],
+                        where: { name: sectorName },
+                    },
+                },
+                {
+                    model: models.Analyst,
+                    attributes: ['id', 'name', 'firm'],
+                },
+            ],
+        });
+
+        
+
+        // 애널리스트에 대한 정보 정렬하기
+        const sortedAnalystData = reports.map((report) => ({
+            id: report.Analyst.id,
+            name: report.Analyst.name,
+            firm: report.Analyst.firm,
+            returnRate: report.Analyst.returnRate,
+            achievementRate: report.Analyst.achievementRate,
+            sector: sectorName
+        }));
+
+        // 애널리스트 기준으로 정렬
+        const sortedAnalystRankings = sortedAnalystData.sort((a, b) => b.returnRate - a.returnRate);
+
+        res.json(sortedAnalystRankings);
+
+    } catch (err) {
+        console.error('Error retrieving analyst data by sector:', err);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
 
 
 
