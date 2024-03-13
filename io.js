@@ -1,6 +1,5 @@
 const { Server } = require("socket.io");
-const { analyst } = require("../models/analyst");
-const { initModels } = require("../models/initModels");
+const { initModels } = require("./models/initModels");
 const models = initModels();
 
 const io = new Server({
@@ -9,11 +8,12 @@ const io = new Server({
     methods: ["GET", "POST"],
   },
 });
-io.on("connection", (socker) => {
-  console.log("New client connected");
 
-  socket.on("connetAnalRoom", (analId) => {
-    console.log("connetAnal : " + analId);
+io.on("connection", (socket) => {
+  console.log("New client connected : " + socket.id);
+
+  socket.on("connectAnalRoom", ({ analId }) => {
+    console.log("connectAnal : " + analId);
     socket.join(analId);
   });
 
@@ -39,7 +39,13 @@ io.on("connection", (socker) => {
     io.to(ReportId).emit("listenLikeReport", likeReportNum);
   });
 
-  socket.on("sendChat", (analId, chatString) => {
-    io.to(analId).emit("listen", chatString);
+  socket.on("sendChat", ({ analId, chatString }) => {
+    console.log("sendchat : " + chatString);
+    io.to(analId).emit("listenChat", chatString);
+  });
+  socket.on("disconnect", (reason) => {
+    console.log(reason);
   });
 });
+
+module.exports = io;
