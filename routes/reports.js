@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const {initModels} = require('../models/initModels');
-const {getStockPriceInfo} = require('../api/openApi');
-const {getOneYearLater} = require('../utils/dateUtil')
+const {calculateReturnRate, calculateAchievementScore} = require('../services/reports');
 const {Op} = require("sequelize");
 const models = initModels();
 
@@ -48,20 +47,9 @@ router.get('/search', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
     try {
         if (req.body.postedAt <= new Date(new Date().setFullYear(new Date().getFullYear() - 1))) {
-            // 수익률 계산
-            const oneYearLater = getOneYearLater(req.body.postedAt);
-            const businessDay = getBusinessDayAround(oneYearLater);
-            const stockPriceInfo = await getStockPriceInfo(req.body.stockName, businessDay);
-            const returnRate = (stockPriceInfo.clpr - req.body.refPrice) / req.body.refPrice;
-
-            // 달성 점수 계산
-            const achievementRate = (stockPriceInfo.clpr - req.body.refPrice) / (req.body.targetPrice - req.body.refPrice);
-            let achievementScore = 100 - Math.abs(100 - achievementRate);
-            if (achievementScore < 0) {
-                achievementScore = 0;
-            }
-            req.body.returnRate = returnRate;
-            req.body.achievementScore = achievementScore;
+            req.body.returnRate = await calculateReturnRate(req.body.stockName, req.body.postedAt, req.body.refPrice);
+            req.body.achievementScore = await calculateAchievementScore(req.body.stockName, req.body.postedAt,
+                req.body.refPrice, req.body.targetPrice);
         }
         const report = await models.Report.create(req.body);
         res.status(201).json(report);
