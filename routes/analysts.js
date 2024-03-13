@@ -171,19 +171,26 @@ router.get('/', async (req, res, next) => {
             ],
         });
 
-        
+        // Report 데이터에서 returnRate와 achievementScore 합산
+        const totalReturnRate = reports.reduce((sum, report) => sum + report.returnRate, 0);
+        const totalAchievementScore = reports.reduce((sum, report) => sum + report.achievementScore, 0);
+
+        // returnRate와 achievementScore의 평균값 계산
+        const averageReturnRate = reports.length > 0 ? totalReturnRate / reports.length : 0;
+        const averageAchievementScore = reports.length > 0 ? totalAchievementScore / reports.length : 0;
+
 
         // 애널리스트에 대한 정보 정렬하기
         const sortedAnalystData = reports.map((report) => ({
             id: report.Analyst.id,
             name: report.Analyst.name,
             firm: report.Analyst.firm,
-            returnRate: report.Analyst.returnRate,
-            achievementRate: report.Analyst.achievementRate,
+            returnRate: averageReturnRate,
+            achievementRate: averageAchievementScore,
             sector: sectorName
         }));
 
-        // 애널리스트 기준으로 정렬
+        // 일단 수익률 기준으로 정렬
         const sortedAnalystRankings = sortedAnalystData.sort((a, b) => b.returnRate - a.returnRate);
 
         res.json(sortedAnalystRankings);
@@ -197,6 +204,38 @@ router.get('/', async (req, res, next) => {
 
 
 // 애널리스트 즐겨찾기 순위 조회 : /api/analysts/follower-rank
+router.get('/follower-rank', async (req, res, next) => {
+    try {
+        // 팔로워 수를 기준으로 애널리스트 정렬
+        const rankedAnalysts = await models.Analyst.findAll({
+            attributes: ['id', 'name', 'firm'],
+            include: [
+                {
+                    model: models.User,  // Follow 테이블을 통해 User와 연결
+                    as: 'Followers',  // 팔로워들
+                    attributes: [],
+                },
+            ],
+            order: [
+                [sequelize.literal('Followers.count'), 'DESC'],  // Followers.count로 정렬
+            ],
+            group: ['Analyst.id'],  // Analyst별로 그룹화하여 팔로워 수를 계산
+        });
+
+        // 결과 정리
+        const followerRankings = rankedAnalysts.map((analyst) => ({
+            id: analyst.id,
+            name: analyst.name,
+            firm: analyst.firm,
+            followerCount: analyst.Followers.length,
+        }));
+
+        res.json(followerRankings);
+    } catch (err) {
+        console.error('Error retrieving analyst follower rankings:', err);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
 
 
 
