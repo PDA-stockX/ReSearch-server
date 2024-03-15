@@ -7,22 +7,21 @@ const models = initModels();
 /* GET home page. */
 router.post("/likeReport", async function (req, res, next) {
   // console.log(req.body);
-  const destoryResult = await models.Dislike.destroy(
-{where: { userId: req.body.userId, analystId: req.body.analId },
-})}
-  );
+  const destoryResult = await models.DislikeReport.destroy({
+    where: { usreId: req.body.userId, reportId: req.body.reportId },
+  });
   console.log(destoryResult);
-  const reportLike = await models.Like.pressLike(
+  const reportLike = await models.LikeReport.pressLikeReport(
     req.body.userId,
-    req.body.analId
+    req.body.reportId
   );
   res.json(reportLike);
 });
 
-router.post("/unFollowAnal", async function (req, res, next) {
-  const reportLike = await models.Follow.pressUnFollow(
+router.post("/unLikeReport", async function (req, res, next) {
+  const reportLike = await models.LikeReport.pressUnlikeReport(
     req.body.userId,
-    req.body.analId
+    req.body.reportId
   );
   res.json(reportLike);
 });

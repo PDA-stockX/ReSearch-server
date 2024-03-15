@@ -1,19 +1,18 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Dislike extends Model {
+  class DislikeReport extends Model {
     static associate(models) {
-      // define association here
       this.belongsTo(models.User, {
         as: "user",
-        targetKey: "userId",
         foreignKey: "userId",
+        targetKey: "userId",
         onDelete: "CASCADE",
       });
       this.belongsTo(models.Report, {
         as: "report",
-        targetKey: "reportId",
         foreignKey: "reportId",
+        targetKey: "reportId",
         onDelete: "CASCADE",
       });
     }
@@ -27,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
           reportId: reportId,
         });
         return {
-          likeReportNum: hateReports.length,
+          hateReportNum: hateReports.length,
         };
       } catch (err) {
         throw err;
@@ -36,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
 
     static async pressUnhateReport(userId, reportId) {
       try {
-        const hateReport = await this.destory({
+        const unHateReport = await this.destroy({
           userId: userId,
           reportId: reportId,
         });
@@ -44,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
           reportId: reportId,
         });
         return {
-          likeReportNum: hateReports.length,
+          hateReportNum: hateReports.length,
         };
       } catch (err) {
         throw err;
@@ -52,15 +51,15 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  Dislike.init(
+  DislikeReport.init(
     {
       userId: DataTypes.INTEGER,
       reportId: DataTypes.INTEGER,
     },
     {
       sequelize,
-      modelName: "Dislike",
+      modelName: "DislikeReport",
     }
   );
-  return Dislike;
+  return DislikeReport;
 };

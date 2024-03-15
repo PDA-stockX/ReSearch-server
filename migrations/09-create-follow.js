@@ -18,7 +18,7 @@ module.exports = {
           },
           onDelete: "CASCADE",
         },
-        allowNull: true,
+        allowNull: false,
       },
       analystId: {
         type: Sequelize.INTEGER,
@@ -29,7 +29,7 @@ module.exports = {
           },
           onDelete: "CASCADE",
         },
-        allowNull: true,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,

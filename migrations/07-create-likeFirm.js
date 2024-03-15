@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('Dislikes', {
+        await queryInterface.createTable('LikeFirms', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
@@ -20,11 +20,11 @@ module.exports = {
                 },
                 allowNull: false
             },
-            analystId: {
+            firmId: {
                 type: Sequelize.INTEGER,
                 references: {
                     model: {
-                        tableName: 'Reports',
+                        tableName: 'Firms',
                         key: 'id'
                     },
                     onDelete: 'CASCADE'
@@ -34,30 +34,14 @@ module.exports = {
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE
-              },
-              updatedAt: {
+            },
+            updatedAt: {
                 allowNull: false,
                 type: Sequelize.DATE
-              }
-        });
-        static async pressHateReport(userId, reportId) {
-            try {
-              const likeReport = await this.create({
-                userId: userId,
-                reportId: reportId,
-              });
-              const likeReports = await this.findAll({
-                reportId: reportId,
-              });
-              return {
-                likeReportNum: likeReports.length,
-              };
-            } catch (err) {
-              throw err;
             }
-          }
+        });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('Dislikes');
+        await queryInterface.dropTable('LikeFirms');
     }
 };
