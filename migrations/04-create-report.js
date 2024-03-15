@@ -2,34 +2,47 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('Likes', {
+        await queryInterface.createTable('Reports', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
                 primaryKey: true,
                 type: Sequelize.INTEGER
             },
-            userId: {
+            analystId: {
                 type: Sequelize.INTEGER,
                 references: {
                     model: {
-                        tableName: 'Users',
+                        tableName: 'Analysts',
                         key: 'id'
                     },
                     onDelete: 'CASCADE'
                 },
                 allowNull: false
             },
-            analystId: {
-                type: Sequelize.INTEGER,
-                references: {
-                    model: {
-                        tableName: 'Reports',
-                        key: 'id'
-                    },
-                    onDelete: 'CASCADE'
-                },
-                allowNull: false
+            pdfUrl: {
+                type: Sequelize.STRING
+            },
+            ticker: {
+                type: Sequelize.STRING
+            },
+            investmentOpinion: {
+                type: Sequelize.STRING
+            },
+            postedAt: {
+                type: Sequelize.DATE
+            },
+            refPrice: {
+                type: Sequelize.INTEGER
+            },
+            targetPrice: {
+                type: Sequelize.INTEGER
+            },
+            returnRate: {
+                type: Sequelize.FLOAT
+            },
+            achievementScore: {
+                type: Sequelize.INTEGER
             },
             createdAt: {
                 allowNull: false,
@@ -42,6 +55,6 @@ module.exports = {
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('Likes');
+        await queryInterface.dropTable('Reports');
     }
 };
