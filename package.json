@@ -7,6 +7,7 @@
     "dev": "nodemon ./bin/www"
   },
   "dependencies": {
+    "@sinonjs/fake-timers": "^11.2.2",
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
     "cookie-parser": "~1.4.4",

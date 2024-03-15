@@ -17,7 +17,6 @@ module.exports = (sequelize, DataTypes) => {
 
         static async signUp(email, password,name, nickname){
             const salt = await bcrypt.genSalt();
-            console.log(salt);
 
             try {
                 const hashedPassword = await bcrypt.hash(password, salt);
