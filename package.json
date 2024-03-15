@@ -23,6 +23,7 @@
     "nodemailer": "^6.9.12",
     "pug": "2.0.0-beta11",
     "sequelize": "^6.37.1",
+    "socket.io": "^4.7.4",
     "validator": "^13.11.0"
   },
   "devDependencies": {
