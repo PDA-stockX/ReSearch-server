@@ -3,15 +3,18 @@ const bcrypt = require("bcrypt");
 
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
-    static associate(models) {
-      // define association here
-      this.hasMany(models.Follow, {
-        as: "follows",
-        foreignKey: "userId",
-        onDelete: "CASCADE",
-      });
-    }
+    class User extends Model {
+        static associate(models) {
+            // define association here
+            this.hasMany(models.Follow, {
+                as: 'follows',
+                foreignKey: 'userId',
+                onDelete: 'CASCADE'
+            });
+        }
+
+        static async signUp(email, password,name, nickname){
+            const salt = await bcrypt.genSalt();
 
     static async signUp(email, password, name, nickname) {
       const salt = await bcrypt.genSalt();
