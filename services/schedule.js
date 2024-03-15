@@ -39,7 +39,7 @@ const updateReport = async () => {
     }
 }
 
-const notifyUserOfNewReports = async () => {
+const notifyUsersOfNewReports = async () => {
 
     try {
         await updateReport(); // 리포트 업데이트
@@ -70,3 +70,5 @@ const notifyUserOfNewReports = async () => {
         console.error(err);
     }
 }
+
+module.exports = {notifyUserOfNewReports: notifyUsersOfNewReports};
