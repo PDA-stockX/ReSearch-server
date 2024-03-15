@@ -16,6 +16,10 @@ io.on("connection", (socket) => {
     console.log("connectAnal : " + analId);
     socket.join(analId);
   });
+  socket.on("leaveRoom", ({ analId }) => {
+    console.log("leaveRoom : " + analId);
+    socket.leave(analId);
+  });
 
   socket.on("disConnectRoomd", (analId) => {
     console.log("leaveAnal : " + analId);
@@ -23,7 +27,7 @@ io.on("connection", (socket) => {
   });
   //Analyst 즐겨찾기추가
   socket.on("favoriteAnal", (userId, analId) => {
-    //AnalDB like++
+    //AnalDB Follow++
     const response = models.Follow.pressFollow(userId, analId);
     console.log(response);
     io.to(analId).emit("listenFavorite", response.likeNum);
@@ -43,6 +47,10 @@ io.on("connection", (socket) => {
     console.log("sendchat : " + chatString);
     io.to(analId).emit("listenChat", chatString);
   });
+
+  
+
+
   socket.on("disconnect", (reason) => {
     console.log(reason);
   });

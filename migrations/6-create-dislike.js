@@ -31,7 +31,31 @@ module.exports = {
                 },
                 allowNull: false
             },
+            createdAt: {
+                allowNull: false,
+                type: Sequelize.DATE
+              },
+              updatedAt: {
+                allowNull: false,
+                type: Sequelize.DATE
+              }
         });
+        static async pressHateReport(userId, reportId) {
+            try {
+              const likeReport = await this.create({
+                userId: userId,
+                reportId: reportId,
+              });
+              const likeReports = await this.findAll({
+                reportId: reportId,
+              });
+              return {
+                likeReportNum: likeReports.length,
+              };
+            } catch (err) {
+              throw err;
+            }
+          }
     },
     async down(queryInterface, Sequelize) {
         await queryInterface.dropTable('Dislikes');

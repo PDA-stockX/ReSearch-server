@@ -5,31 +5,35 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.User, {
-        as: "user",
+        // as: "user",
         foreignKey: "userId",
+        targetKey: "userId",
         onDelete: "CASCADE",
       });
       this.belongsTo(models.Analyst, {
-        as: "analyst",
+        // as: "analyst",
+        targetKey: "analystId",
         foreignKey: "analystId",
         onDelete: "CASCADE",
       });
     }
 
     static async pressFollow(userId, analId) {
+      console.log(userId + analId);
       try {
         const analFollow = await this.create({
-          userId,
-          analId,
+          userId: userId,
+          analystId: analId,
         });
         const analFollows = await this.findAll({
-          userId: userId,
-          analId: analId,
+          where: {
+            analystId: analId,
+          },
         });
+
         return {
-          userId: analLike.userId,
-          analId: analLike.analId,
-          followNum: analLikes.length,
+          // followNum: analFollows.length,
+          followNum: analFollows.length,
         };
       } catch (err) {
         throw err;
@@ -38,17 +42,15 @@ module.exports = (sequelize, DataTypes) => {
 
     static async pressUnFollow(userId, analId) {
       try {
-        const analUnFollow = await this.destory({
-          where: { userId: userId, analId: analId },
+        console.log(userId + "analId : " + analId);
+        await this.destroy({
+          where: { userId: userId, analystId: analId },
         });
         const analUnFollows = await this.findAll({
-          userId: userId,
-          analId: analId,
+          where: { analystId: analId },
         });
         return {
-          userId: analUnFollow.userId,
-          analId: analUnFollow.analId,
-          likeNum: analUnFollows.length,
+          followNum: analUnFollows.length,
         };
       } catch (err) {
         throw err;
@@ -57,7 +59,10 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   Follow.init(
-    {},
+    {
+      userId: DataTypes.INTEGER,
+      analystId: DataTypes.INTEGER,
+    },
     {
       sequelize,
       modelName: "Follow",
