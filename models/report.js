@@ -5,18 +5,17 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Report extends Model {
         static associate(models) {
-            // define association here
             this.belongsTo(models.Analyst, {
                 as: 'analyst',
                 foreignKey: 'analystId',
                 onDelete: 'CASCADE'
             });
-            this.hasMany(models.Like, {
+            this.hasMany(models.LikeReport, {
                 as: 'likes',
                 foreignKey: 'reportId',
                 onDelete: 'CASCADE'
             });
-            this.hasMany(models.Dislike, {
+            this.hasMany(models.DislikeReport, {
                 as: 'dislikes',
                 foreignKey: 'reportId',
                 onDelete: 'CASCADE'
@@ -32,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
         refPrice: DataTypes.INTEGER,
         targetPrice: DataTypes.INTEGER,
         returnRate: DataTypes.FLOAT,
-        achievementScore: DataTypes.FLOAT
+        achievementScore: DataTypes.INTEGER
     }, {
         sequelize,
         modelName: 'Report',
