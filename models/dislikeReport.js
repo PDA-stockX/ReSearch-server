@@ -3,9 +3,8 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class Dislike extends Model {
+    class DislikeReport extends Model {
         static associate(models) {
-            // define association here
             this.belongsTo(models.User, {
                 as: 'user',
                 foreignKey: 'userId',
@@ -19,9 +18,9 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
 
-    Dislike.init({}, {
+    DislikeReport.init({}, {
         sequelize,
-        modelName: 'Dislike',
+        modelName: 'DislikeReport',
     });
-    return Dislike;
+    return DislikeReport;
 };
