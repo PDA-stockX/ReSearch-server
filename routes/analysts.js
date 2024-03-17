@@ -129,8 +129,8 @@ async function getAnalystRankings(orderBy, res) {
 }
 
 
-// 애널리스트 수익률 순위 조회 : /api/analysts/earning-rate
-router.get('/earning-rate', async (req, res, next) => {
+// 애널리스트 수익률 순위 조회 : /api/analysts/return-rate
+router.get('return-rate', async (req, res, next) => {
     await getAnalystRankings('returnRate', res);
 });
 
