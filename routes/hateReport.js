@@ -3,26 +3,40 @@ var router = express.Router();
 
 const { initModels } = require("../models/initModels");
 const models = initModels();
-
+const { verifyToken } = require("../services/auth");
 /* GET home page. */
 router.post("/hateReport", async function (req, res, next) {
   // console.log(req.body);
-  const destoryResult = await models.Like.destroy({
-    where: { userId: req.body.userId, analystId: req.body.analId },
-  });
-  const analystList = await models.Dislike.pressHateReport(
-    req.body.userId,
-    req.body.analId
-  );
-  res.json(analystList);
+  const token = req.cookies["authToken"];
+
+  const ValidToken = verifyToken(token);
+  if (ValidToken) {
+    const destoryResult = await models.LikeReport.destroy({
+      where: { userId: req.body.userId, analystId: req.body.reportId },
+    });
+    const analystList = await models.DislikeReport.pressHateReport(
+      req.body.userId,
+      req.body.reportId
+    );
+    res.json(analystList);
+  } else {
+    res.json({ message: "fail" });
+  }
 });
 
-router.post("/unFollowAnal", async function (req, res, next) {
-  const analystList = await models.Dislike.pressUnhateReport(
-    req.body.userId,
-    req.body.analId
-  );
-  res.json(analystList);
+router.post("/unHateReport", async function (req, res, next) {
+  const token = req.cookies["authToken"];
+
+  const ValidToken = verifyToken(token);
+  if (ValidToken) {
+    const analystList = await models.DislikeReport.pressUnhateReport(
+      req.body.userId,
+      req.body.reportId
+    );
+    res.json(analystList);
+  } else {
+    res.json({ message: "fail" });
+  }
 });
 
 module.exports = router;
