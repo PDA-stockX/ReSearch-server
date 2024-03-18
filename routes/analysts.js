@@ -14,7 +14,7 @@ async function updateAnalystRates() {
         // Analyst 별로 업데이트 수행
         for (const analyst of analysts) {
             // 이미 값이 있는 경우에는 계산하지 않음
-            if (analyst.returnRate !== null && analyst.achievementRate !== null) {
+            if (analyst.returnRate !== null && analyst.achievementScore !== null) {
                 continue;
             }
 
@@ -25,11 +25,7 @@ async function updateAnalystRates() {
                 },
                 include: {
                     model: models.ReportSector,
-                    attributes: ['sectorId'],
-                    include: {
-                        model: models.Sector,
-                        attributes: ['name'],
-                    },
+                    attributes: ['sectorName'],
                 }
             });
 
@@ -48,7 +44,7 @@ async function updateAnalystRates() {
             await models.Analyst.update(
                 {
                     returnRate: averageReturnRate,
-                    achievementRate: averageAchievementScore,
+                    achievementScore: averageAchievementScore,
                 },
                 {
                     where: { id: analyst.id },
@@ -71,41 +67,33 @@ async function getAnalystRankings(orderBy, res) {
         // updateAnalystRates 함수 호출
         await updateAnalystRates();
 
-        // Analyst 테이블에서 name, firm, returnRate, achievementRate 가져오기
+        // Analyst 테이블에서 name, firm, returnRate, achievementScore 가져오기
         const analystData = await models.Analyst.findAll({
-            attributes: ['id', 'name', 'firm', 'returnRate', 'achievementRate'],
-        });
-
-        // Analyst 별 업종명 배열 가져오기
-        const analystSectors = await models.Report.findAll({
-            attributes: ['analystId'],
+            attributes: ['id', 'name', 'returnRate', 'achievementScore'],
             include: {
-                model: models.ReportSector,
-                attributes: [],
-                include: {
-                    model: models.Sector,
-                    attributes: ['name'],
-                },
+                model: models.Firm,
+                attributes: ['name'],
+                // as: 'firm',
             },
-            raw: true,
-            nest: true,
         });
 
-        const analystSectorMap = {};
-        analystSectors.forEach((report) => {
-            const analystId = report.analystId;
-            if (!analystSectorMap[analystId]) {
-                analystSectorMap[analystId] = [];
-            }
+        // Analyst 별 업종 정보 가져오기
+        await Promise.all(analystData.map(async (analyst) => {
+            // 애널리스트가 작성한 리포트들을 모두 불러옵니다.
+            const reports = await models.Report.findAll({
+                where: { analystId: analyst.id },
+                include: {
+                    model: models.ReportSector,
+                    attributes: ['sectorName'],
+                },
+            });
 
-            analystSectorMap[analystId].push(
-                ...Array.from(new Set(report.ReportSectors.map((rs) => rs.Sector.name)))
-            );
-        });
+            // 리포트들에 포함된 업종명을 배열로 저장합니다.
+            const sectorNames = reports.flatMap(report => report.ReportSectors.map(rs => rs.sectorName));
 
-        Object.keys(analystSectorMap).forEach((analystId) => {
-            analystSectorMap[analystId] = Array.from(new Set(analystSectorMap[analystId]));
-        });
+            // 중복된 업종명을 제거합니다.
+            analyst.sectorNames = Array.from(new Set(sectorNames));
+        }));
 
         // Analyst에 대한 정보 정렬하기
         const sortedAnalystData = analystData.map((analyst) => ({
@@ -113,7 +101,7 @@ async function getAnalystRankings(orderBy, res) {
             name: analyst.name,
             firm: analyst.firm,
             returnRate: analyst.returnRate,
-            achievementRate: analyst.achievementRate,
+            achievementScore: analyst.achievementScore,
             sectorNames: analystSectorMap[analyst.id] || [],
         }));
 
@@ -130,14 +118,14 @@ async function getAnalystRankings(orderBy, res) {
 
 
 // 애널리스트 수익률 순위 조회 : /api/analysts/return-rate
-router.get('return-rate', async (req, res, next) => {
+router.get('/return-rate', async (req, res, next) => {
     await getAnalystRankings('returnRate', res);
 });
 
 
 // 애널리스트 달성률 순위 조회 : /api/analysts/achievement-rate
 router.get('/achievement-rate', async (req, res, next) => {
-    await getAnalystRankings('achievementRate', res);
+    await getAnalystRankings('achievementScore', res);
 });
 
 
@@ -162,18 +150,19 @@ router.get('/', async (req, res, next) => {
             include: [
                 {
                     model: models.ReportSector,
+                    where: { sectorName },
                     attributes: [],
-                    include: {
-                        model: models.Sector,
-                        attributes: ['name'],
-                        where: { name: sectorName },
-                    },
                 },
                 {
                     model: models.Analyst,
-                    attributes: ['id', 'name', 'firm'],
+                    attributes: ['id', 'name', 'firmId'],
+                    include: {
+                        model: models.Firm,
+                        attributes: ['name'],
+                    },
                 },
             ],
+            attributes: ['id', 'returnRate', 'achievementScore'],
         });
 
         // Report 데이터에서 returnRate와 achievementScore 합산
@@ -191,11 +180,11 @@ router.get('/', async (req, res, next) => {
             name: report.Analyst.name,
             firm: report.Analyst.firm,
             returnRate: averageReturnRate,
-            achievementRate: averageAchievementScore,
+            achievementScore: averageAchievementScore,
             sector: sectorName
         }));
 
-        // 일단 수익률 기준으로 정렬
+        // 일단 수익률 기준으로 정렬 (가중치 적용하기로 함)
         const sortedAnalystRankings = sortedAnalystData.sort((a, b) => b.returnRate - a.returnRate);
 
         res.json(sortedAnalystRankings);
