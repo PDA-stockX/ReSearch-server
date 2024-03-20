@@ -21,8 +21,8 @@ router.get('/', async (req, res, next) => {
                     {id: reportIds},
                     {returnRate: {[Op.gte]: req.query.returnRate}},
                     {returnRate: {[Op.lte]: req.query.returnRate}},
-                    {achievementRate: {[Op.gte]: req.query.achievementRate}},
-                    {achievementRate: {[Op.lte]: req.query.achievementRate}},
+                    {achievementScore: {[Op.gte]: req.query.achievementScore}},
+                    {achievementScore: {[Op.lte]: req.query.achievementScore}},
                 ]
             }
         });
@@ -37,6 +37,7 @@ router.get('/', async (req, res, next) => {
 
 // 리포트 생성 (현재 시점으로부터 1년 이상 이전 데이터만 수익률/달성률 계산)
 router.post('/', async (req, res, next) => {
+    // todo: 연관관계 맺어주기
     try {
         if (req.body.postedAt <= new Date(new Date().setFullYear(new Date().getFullYear() - 1))) {
             req.body.returnRate = await calculateReturnRate(req.body.stockName, req.body.postedAt, req.body.refPrice);
@@ -64,8 +65,6 @@ router.get('/search', async (req, res, next) => {
             res.json([]);
             return;
         }
-
-        console.log(reportSectors[0]);
 
         const reports = await models.Report.findAll({
             where: {

@@ -29,7 +29,7 @@ function initModels() {
     const ReportSector = _ReportSector(sequelize, Sequelize.DataTypes);
 
     User.associate({Follow});
-    Firm.associate({Report, LikeFirm, DislikeFirm})
+    Firm.associate({Report, LikeFirm, DislikeFirm, Analyst});
     Analyst.associate({Report, Follow, Firm});
     Report.associate({Firm, Analyst, LikeReport, DislikeReport});
     LikeReport.associate({User, Report});
