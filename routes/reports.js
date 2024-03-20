@@ -6,18 +6,11 @@ const {calculateReturnRate, calculateAchievementScore} = require('../services/re
 const {Op} = require("sequelize");
 const models = initModels();
 
-router.get('/search', async (req, res, next) => {
-
+router.get('/', async (req, res, next) => {
     try {
-        const sector = await models.Sector.findOne({
+        const reportSectors = await models.ReportSector.findOne({
             where: {
-                name: req.query.sector
-            }
-        });
-
-        const reportSectors = await models.ReportSector.findAll({
-            where: {
-                sectorId: sector.id
+                sectorName: req.query.sector
             }
         });
 
@@ -59,3 +52,31 @@ router.post('/', async (req, res, next) => {
         next(err);
     }
 });
+
+// 리포트 조회 (by search keyword)
+router.get('/search', async (req, res, next) => {
+    try {
+        const reportSectors = await models.ReportSector.findAll({
+            where: {
+                sectorName: req.query.keyword
+            }
+        });
+        if (reportSectors.length === 0) {
+            res.json([]);
+            return;
+        }
+
+        const reports = await models.Report.findAll({
+            where: {
+                id: reportSectors.map(reportSector => reportSector.reportId)
+            }
+        });
+        res.json(reports);
+    } catch (err) {
+        console.error(err);
+        res.status(400).json({message: "fail"});
+        next(err);
+    }
+});
+
+module.exports = router;
