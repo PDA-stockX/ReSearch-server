@@ -74,3 +74,19 @@ router.post("/", async (req, res, next) => {
     next(err);
   }
 });
+
+// 리포트 sector 가져오기 : /report-sector
+router.get("/report-sector", async (req, res, next) => {
+  try {
+    const sectors = await models.ReportSector.findAll({
+      attributes: ["sectorName"],
+      distinct: true,
+    });
+    res.status(200).json({ data: sectors });
+  } catch (err) {
+    console.error(err);  
+    next(err);  
+  }
+})
+
+module.exports = router;
