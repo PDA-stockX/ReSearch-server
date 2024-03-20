@@ -6,12 +6,13 @@ const logger = require("morgan");
 const schedule = require("node-schedule");
 const { notifyUsersOfNewReports } = require("./services/schedule");
 
-const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
+const reportsRouter = require("./routes/reports");
+const analystsRouter = require("./routes/analysts");
+const firmsRouter = require("./routes/firms");
 const followAnalRouter = require("./routes/followAnal");
 const likeReportRouter = require("./routes/likeReport");
-const analystRouter = require("./routes/analyst");
-const reportRouter = require("./routes/reports");
+
 const app = express();
 const cors = require("cors");
 app.use(cors({ origin: "*" }));
@@ -25,12 +26,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/reports", reportsRouter);
+app.use("/analysts", analystsRouter);
+app.use("/firms", firmsRouter);
 app.use("/followAnal", followAnalRouter);
 app.use("/likeReport", likeReportRouter);
-app.use("/analyst", analystRouter);
-app.use("/report", reportRouter);
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));

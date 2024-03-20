@@ -18,7 +18,7 @@ const calculateAchievementScore = async (stockName, postedAt, refPrice, targetPr
 const getPriceInfoAfterOneYear = async (stockName, postedAt) => {
     const oneYearLater = getOneYearLater(postedAt);
     const businessDay = getBusinessDayAround(oneYearLater);
-    const stockPriceInfo = await getStockPriceInfo(stockName, businessDay);
+    return await getStockPriceInfo(stockName, businessDay);
 }
 
 module.exports = {calculateReturnRate, calculateAchievementScore};
