@@ -74,3 +74,24 @@ router.post("/", async (req, res, next) => {
     next(err);
   }
 });
+
+router.get("/:reportId", async (req, res, next) => {
+  try {
+    const reportInfo = await models.Report.findOne({
+      include: [
+        {
+          model: models.Analyst,
+          attributes: ["name", "firm"],
+        },
+      ],
+      where: { id: req.params.reportId },
+    });
+    console.log(reportInfo);
+    res.json(reportInfo);
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+});
+
+module.exports = router;
