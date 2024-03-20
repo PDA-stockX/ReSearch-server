@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'analystId',
                 onDelete: 'CASCADE'
             });
+            this.belongsTo(models.Firm, {
+                as: 'firm',
+                foreignKey: 'firmId',
+                onDelete: 'CASCADE'
+            });
             this.hasMany(models.LikeReport, {
                 as: 'likes',
                 foreignKey: 'reportId',

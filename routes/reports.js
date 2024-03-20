@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const {initModels} = require('../models/initModels');
+const models = require('../models/index');
 const {calculateReturnRate, calculateAchievementScore} = require('../services/reports');
 const {Op} = require("sequelize");
-const models = initModels();
 
 router.get('/', async (req, res, next) => {
     try {
@@ -65,6 +64,8 @@ router.get('/search', async (req, res, next) => {
             res.json([]);
             return;
         }
+
+        console.log(reportSectors[0]);
 
         const reports = await models.Report.findAll({
             where: {

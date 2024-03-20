@@ -20,6 +20,23 @@ module.exports = {
                 },
                 allowNull: false
             },
+            firmId: {
+                type: Sequelize.INTEGER,
+                references: {
+                    model: {
+                        tableName: 'Firms',
+                        key: 'id'
+                    },
+                    onDelete: 'CASCADE'
+                },
+                allowNull: false
+            },
+            title: {
+                type: Sequelize.STRING
+            },
+            summary: {
+                type: Sequelize.STRING
+            },
             pdfUrl: {
                 type: Sequelize.STRING
             },
