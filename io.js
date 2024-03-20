@@ -16,33 +16,39 @@ io.on("connection", (socket) => {
     console.log("connectAnal : " + analId);
     socket.join(analId);
   });
+  socket.on("leaveRoom", ({ analId }) => {
+    console.log("leaveRoom : " + analId);
+    socket.leave(analId);
+  });
 
   socket.on("disConnectRoomd", (analId) => {
     console.log("leaveAnal : " + analId);
     socket.leave(analId);
   });
-  //Analyst 즐겨찾기추가
-  socket.on("favoriteAnal", (userId, analId) => {
-    //AnalDB like++
-    const response = models.Follow.pressFollow(userId, analId);
-    console.log(response);
-    io.to(analId).emit("listenFavorite", response.likeNum);
-  });
+  // //Analyst 즐겨찾기추가
+  // socket.on("favoriteAnal", (userId, analId) => {
+  //   //AnalDB Follow++
+  //   const response = models.Follow.pressFollow(userId, analId);
+  //   console.log(response);
+  //   io.to(analId).emit("listenFavorite", response.likeNum);
+  // });
 
-  socket.on("unFavoriteAnal", (userId, analId) => {
-    const response = models.Follow.pressUnFollow(userId, analId);
-    io.to(analId).emit("listenUnFavorite", response.likeNum);
-  });
+  // socket.on("unFavoriteAnal", (userId, analId) => {
+  //   const response = models.Follow.pressUnFollow(userId, analId);
+  //   io.to(analId).emit("listenUnFavorite", response.likeNum);
+  // });
 
-  //Report 좋아요 추가
-  socket.on("LikeReport", (ReportId) => {
-    io.to(ReportId).emit("listenLikeReport", likeReportNum);
-  });
+  // //Report 좋아요 추가
+  // socket.on("LikeReport", (ReportId) => {
+  //   io.to(ReportId).emit("listenLikeReport", likeReportNum);
+  // });
 
-  socket.on("sendChat", ({ analId, chatString }) => {
+  socket.on("sendChat", ({ analId, chatString, user }) => {
     console.log("sendchat : " + chatString);
-    io.to(analId).emit("listenChat", chatString);
+    console.log(user);
+    io.to(analId).emit("listenChat", { chatString, user });
   });
+
   socket.on("disconnect", (reason) => {
     console.log(reason);
   });
