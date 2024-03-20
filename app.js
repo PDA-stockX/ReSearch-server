@@ -1,17 +1,11 @@
-const createError = require("http-errors");
-const express = require("express");
-const path = require("path");
-const cookieParser = require("cookie-parser");
-const logger = require("morgan");
-const schedule = require("node-schedule");
-const { notifyUsersOfNewReports } = require("./services/schedule");
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
-const usersRouter = require("./routes/users");
-const reportsRouter = require("./routes/reports");
-const analystsRouter = require("./routes/analysts");
-const firmsRouter = require("./routes/firms");
-const followAnalRouter = require("./routes/followAnal");
-const likeReportRouter = require("./routes/likeReport");
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
 
 const app = express();
 const cors = require("cors");

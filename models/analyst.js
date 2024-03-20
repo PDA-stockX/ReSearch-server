@@ -25,9 +25,9 @@ module.exports = (sequelize, DataTypes) => {
   Analyst.init(
     {
       name: DataTypes.STRING,
-      firm: DataTypes.STRING,
+      firmId: DataTypes.STRING,
       returnRate: DataTypes.FLOAT,
-      achievementRate: DataTypes.INTEGER,
+      achievementScore: DataTypes.INTEGER,
       email: DataTypes.STRING,
       photoUrl: DataTypes.STRING,
     },
