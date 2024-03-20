@@ -3,38 +3,44 @@ var router = express.Router();
 
 const { initModels } = require("../models/initModels");
 const models = initModels();
-const { verifyToken } = require("../services/auth");
+const { verifyToken, authenticate } = require("../services/auth");
+
+router.get("/checkFollow", async function (req, res, next) {
+  console.log(req.query);
+  const checkAnalyst = await models.Follow.findOne({
+    where: {
+      userId: req.query.userId,
+      analystId: req.query.analId,
+    },
+  });
+  console.log("checkAnal = " + checkAnalyst);
+  if (checkAnalyst == null) {
+    res.json({ message: "No" });
+  } else {
+    res.json({ message: "Yes" });
+  }
+  // if (cehckAnalyst) res.json({ message: "Yes" });
+  // else
+});
+
+router.use(authenticate);
 /* GET home page. */
-router.post("/followAnal", async function (req, res, next) {
-  // console.log(req.body);
-  const token = req.cookies["authToken"];
-
-  const ValidToken = verifyToken(token);
-  if (ValidToken) {
-    const analystList = await models.Follow.pressFollow(
-      req.body.userId,
-      req.body.analId
-    );
-    res.json(analystList);
-  } else {
-    res.json({ message: "fail" });
-  }
+router.post("/followAnal", authenticate, async function (req, res, next) {
+  // console.log(req);
+  const analystList = await models.Follow.create({
+    userId: req.user.id,
+    analystId: req.body.analId,
+  });
+  console.log(analystList);
+  // res.json(analystList);
+  res.json({ message: "success" });
 });
-
 router.post("/unFollowAnal", async function (req, res, next) {
-  const token = req.cookies["authToken"];
-
-  const ValidToken = verifyToken(token);
-  if (ValidToken) {
-    const analystList = await models.Follow.pressUnFollow(
-      req.body.userId,
-      req.body.analId
-    );
-    res.json(analystList);
-  } else {
-    res.json({ message: "fail" });
-  }
+  // console.log(req);
+  const analystList = await models.Follow.destroy({
+    where: { userId: req.user.id, analystId: req.body.analId },
+  });
+  // res.json(analystList);
+  res.json({ message: "success" });
 });
-router.get;
-
 module.exports = router;
