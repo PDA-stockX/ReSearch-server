@@ -1,8 +1,9 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class DislikeReport extends Model {
+  class Like extends Model {
     static associate(models) {
+      // define association here
       this.belongsTo(models.User, {
         as: "user",
         foreignKey: "userId",
@@ -11,39 +12,40 @@ module.exports = (sequelize, DataTypes) => {
       });
       this.belongsTo(models.Report, {
         as: "report",
-        foreignKey: "reportId",
         targetKey: "reportId",
+        foreignKey: "reportId",
         onDelete: "CASCADE",
       });
     }
-    static async pressHateReport(userId, reportId) {
+
+    static async pressLikeReport(userId, reportId) {
       try {
-        const hateReport = await this.create({
+        const likeReport = await this.create({
           userId: userId,
           reportId: reportId,
         });
-        const hateReports = await this.findAll({
+        const likeReports = await this.findAll({
           reportId: reportId,
         });
         return {
-          hateReportNum: hateReports.length,
+          likeReportNum: likeReports.length,
         };
       } catch (err) {
         throw err;
       }
     }
 
-    static async pressUnhateReport(userId, reportId) {
+    static async pressUnLikeReport(userId, reportId) {
       try {
-        const unHateReport = await this.destroy({
+        const unLikeReport = await this.destroy({
           userId: userId,
           reportId: reportId,
         });
-        const hateReports = await this.findAll({
+        const likeReports = await this.findAll({
           reportId: reportId,
         });
         return {
-          hateReportNum: hateReports.length,
+          likeReportNum: likeReports.length,
         };
       } catch (err) {
         throw err;
@@ -51,15 +53,15 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  DislikeReport.init(
+  Like.init(
     {
       userId: DataTypes.INTEGER,
       reportId: DataTypes.INTEGER,
     },
     {
       sequelize,
-      modelName: "DislikeReport",
+      modelName: "Like",
     }
   );
-  return DislikeReport;
+  return Like;
 };
