@@ -69,11 +69,7 @@ router.post("/verifyToken", async (req, res, next) => {
         console.error(err);
         res.status(500).json({message: "서버 오류"});
     }
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "서버 오류" });
-  }
-});
+  });
 
 router.get('/check-nickname', async (req, res, next) => {
     try {
