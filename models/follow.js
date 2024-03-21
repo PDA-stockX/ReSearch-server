@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       this.belongsTo(models.Analyst, {
         as: "analyst",
-        targetKey: "analystId",
+        foreignKey: "analystId",
         onDelete: "CASCADE",
       });
     }
