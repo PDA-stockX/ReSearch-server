@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const {initModels} = require('../models/initModels');
-const {Op} = require("sequelize");
+const sequelize = require("sequelize");
+const Op = sequelize.Op
 
 const models = initModels();
 
@@ -87,6 +88,43 @@ router.get('/return-rate', (req, res, next) => {
 // 애널리스트 달성률 순위 조회 : /analysts/achievement-score
 router.get('/achievement-score', async (req, res, next) => {
     await getAnalystRankings('achievementScore', res);
+});
+
+
+
+// 애널리스트 즐겨찾기 순위 조회 : /analysts/follower-rank
+router.get('/follower-rank', async (req, res, next) => {
+    try {
+        // 팔로워 수를 기준으로 애널리스트 정렬
+        const rankedAnalysts = await models.Analyst.findAll({
+            attributes: [
+                'id', 'name', 'firmId',
+                [sequelize.fn('COUNT', sequelize.col('`follows`.userId')), 'followerCount']
+            ],
+            include: [
+                {
+                    model: models.Follow,
+                    as: 'follows',
+                    attributes: [],
+                    // required: false
+                },
+                {
+                    model: models.Firm,
+                    as: 'firm',
+                    attributes: ['name']
+                }
+            ],
+            group: ['Analyst.id'],
+            order: [[sequelize.literal("followerCount"), 'DESC']]
+        });
+        console.log('a', rankedAnalysts)
+
+        res.json(rankedAnalysts);
+
+    } catch (err) {
+        console.error('Error retrieving analyst follower rankings:', err);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
 });
 
 
@@ -225,41 +263,6 @@ async function getAnalystRankings(orderBy, res) {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 }
-
-
-// 애널리스트 즐겨찾기 순위 조회 : /analysts/follower-rank
-router.get('/follower-rank', async (req, res, next) => {
-    try {
-        // 팔로워 수를 기준으로 애널리스트 정렬
-        const rankedAnalysts = await models.Analyst.findAll({
-            attributes: ['id', 'name', 'firm'],
-            include: [
-                {
-                    model: models.User,  // Follow 테이블을 통해 User와 연결
-                    as: 'Followers',  // 팔로워들
-                    attributes: [],
-                },
-            ],
-            order: [
-                [sequelize.literal('Followers.count'), 'DESC'],  // Followers.count로 정렬
-            ],
-            group: ['Analyst.id'],  // Analyst별로 그룹화하여 팔로워 수를 계산
-        });
-
-        // 결과 정리
-        const followerRankings = rankedAnalysts.map((analyst) => ({
-            id: analyst.id,
-            name: analyst.name,
-            firm: analyst.firm,
-            followerCount: analyst.Followers.length,
-        }));
-
-        res.json(followerRankings);
-    } catch (err) {
-        console.error('Error retrieving analyst follower rankings:', err);
-        res.status(500).json({ message: 'Internal Server Error' });
-    }
-});
 
 
 
