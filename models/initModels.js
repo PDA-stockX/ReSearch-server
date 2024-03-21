@@ -2,6 +2,7 @@ const Sequelize = require("sequelize");
 
 const sequelize = new Sequelize("re_search", "admin", "admin", {
     host: "localhost",
+    port: 3305,
     dialect: "mariadb",
 });
 
@@ -33,7 +34,7 @@ function initModels() {
     User.associate({Follow});
     Firm.associate({Report, LikeFirm, DislikeFirm, Analyst});
     Analyst.associate({Report, Follow, Firm});
-    Report.associate({Firm, Analyst, LikeReport, DislikeReport});
+    Report.associate({Firm, Analyst, LikeReport, DislikeReport, ReportSector});
     LikeReport.associate({User, Report});
     DislikeReport.associate({User, Report});
     LikeFirm.associate({User, Firm});
