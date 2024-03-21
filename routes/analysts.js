@@ -38,15 +38,15 @@ router.get("/:analId", async (req, res, next) => {
     }
 });
 
-
-// 애널리스트 총 수익률, 총 달성률 추가
-async function updateAnalystRates() {
+// 애널리스트 정보 업데이트 : /  <- 배치
+router.post('/', async (req, res, next) => {
     try {
         // Analyst 테이블의 모든 레코드 가져오기
-        const analysts = await models.Analyst.findAll();
+        const analysts = await models.Analyst.findAll()
 
         // Analyst 별로 업데이트 수행
         for (const analyst of analysts) {
+
             // 이미 값이 있는 경우에는 계산하지 않음
             if (analyst.returnRate !== null && analyst.achievementScore !== null) {
                 continue;
@@ -57,10 +57,7 @@ async function updateAnalystRates() {
                 where: {
                     analystId: analyst.id,
                 },
-                include: {
-                    model: models.ReportSector,
-                    attributes: ['sectorName'],
-                }
+                attributes: ['returnRate', 'achievementScore'],
             });
 
             // Report 데이터에서 returnRate와 achievementScore 합산
@@ -70,9 +67,6 @@ async function updateAnalystRates() {
             // returnRate와 achievementScore의 평균값 계산
             const averageReturnRate = reports.length > 0 ? totalReturnRate / reports.length : 0;
             const averageAchievementScore = reports.length > 0 ? totalAchievementScore / reports.length : 0;
-
-            // // Analyst가 쓴 리포트의 업종명을 배열로 저장
-            // const sectorNames = Array.from(new Set(reports.flatMap(report => report.ReportSectors.map(rs => rs.Sector.name))));
 
             // Analyst 데이터 업데이트
             await models.Analyst.update(
@@ -85,20 +79,20 @@ async function updateAnalystRates() {
                 }
             );
         }
-        
-        console.log('Analyst rates calculation and update successful.');
-    } catch (error) {
-        console.error('Error updating analyst rates:', error);
+    } catch (err) {
+        console.error(err);
+        res.status(400).json({message: "fail"});
+        next(err);
     }
-}
+})
 
 
 // 수익률 및 달성률에 대한 정렬 기준
 async function getAnalystRankings(orderBy, res) {
     try {
 
-        // updateAnalystRates 함수 호출
-        await updateAnalystRates();
+        // // updateAnalystRates 함수 호출
+        // await updateAnalystRates();
 
         // Analyst 테이블에서 name, firm, returnRate, achievementScore 가져오기
         const analystData = await models.Analyst.findAll({
