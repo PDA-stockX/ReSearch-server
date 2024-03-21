@@ -9,6 +9,13 @@ router.get("/:analId", async (req, res, next) => {
   try {
     console.log(req.params.analId);
     const analInfo = await models.Analyst.findOne({
+      include: [
+        {
+          model: models.Firm,
+          as: "firm",
+          attributes: ["name"],
+        },
+      ],
       where: { id: req.params.analId },
     });
     console.log(analInfo);

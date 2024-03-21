@@ -6,12 +6,12 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.User, {
         as: "user",
         foreignKey: "userId",
-        targetKey: "userId",
+
         onDelete: "CASCADE",
       });
       this.belongsTo(models.Firm, {
         as: "firm",
-        targetKey: "firmId",
+
         foreignKey: "firmId",
         onDelete: "CASCADE",
       });
@@ -53,10 +53,7 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   LikeFirm.init(
-    {
-      userId: DataTypes.INTEGER,
-      firmId: DataTypes.INTEGER,
-    },
+    {},
     {
       sequelize,
       modelName: "LikeFirm",

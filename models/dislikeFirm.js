@@ -5,13 +5,11 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       this.belongsTo(models.User, {
         as: "user",
-        targetKey: "userId",
         foreignKey: "userId",
         onDelete: "CASCADE",
       });
       this.belongsTo(models.Firm, {
         as: "firm",
-        targetKey: "firmId",
         foreignKey: "firmId",
         onDelete: "CASCADE",
       });

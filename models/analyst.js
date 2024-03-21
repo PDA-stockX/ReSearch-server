@@ -15,7 +15,6 @@ module.exports = (sequelize, DataTypes) => {
       });
       this.belongsTo(models.Firm, {
         as: "firm",
-        targetKey: "firmId",
         foreignKey: "firmId",
         onDelete: "CASCADE",
       });
@@ -25,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
   Analyst.init(
     {
       name: DataTypes.STRING,
-      firmId: DataTypes.STRING,
+      firmId: DataTypes.INTEGER,
       returnRate: DataTypes.FLOAT,
       achievementScore: DataTypes.INTEGER,
       email: DataTypes.STRING,

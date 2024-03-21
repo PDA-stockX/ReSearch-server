@@ -1,12 +1,16 @@
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-
+// const indexRouter = require('./routes/index');
+const usersRouter = require("./routes/users");
+const reportsRouter = require("./routes/reports");
+const analystRouter = require("./routes/analyst");
+const firmsRouter = require("./routes/firms");
+const followAnalRouter = require("./routes/followAnal");
+const likeReportRouter = require("./routes/likeReport");
 const app = express();
 const cors = require("cors");
 app.use(cors({ origin: "*" }));
@@ -22,7 +26,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/users", usersRouter);
 app.use("/reports", reportsRouter);
-app.use("/analysts", analystsRouter);
+app.use("/analyst", analystRouter);
 app.use("/firms", firmsRouter);
 app.use("/followAnal", followAnalRouter);
 app.use("/likeReport", likeReportRouter);
@@ -43,13 +47,13 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-// 매일 10시에 리포트 업데이트
-const rule = new schedule.RecurrenceRule();
-rule.hour = 10;
-rule.minute = 0;
+// // 매일 10시에 리포트 업데이트
+// const rule = new schedule.RecurrenceRule();
+// rule.hour = 10;
+// rule.minute = 0;
 
-const job = schedule.scheduleJob(rule, function () {
-  notifyUsersOfNewReports();
-});
+// const job = schedule.scheduleJob(rule, function () {
+//   notifyUsersOfNewReports();
+// });
 
 module.exports = app;

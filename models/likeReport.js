@@ -6,12 +6,12 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.User, {
         as: "user",
         foreignKey: "userId",
-        targetKey: "userId",
+
         onDelete: "CASCADE",
       });
       this.belongsTo(models.Report, {
         as: "report",
-        targetKey: "reportId",
+
         foreignKey: "reportId",
         onDelete: "CASCADE",
       });
