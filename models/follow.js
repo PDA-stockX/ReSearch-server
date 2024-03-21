@@ -58,7 +58,10 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   Follow.init(
-    {},
+    {
+      userId: DataTypes.INTEGER,
+      analystId: DataTypes.INTEGER,
+    },
     {
       sequelize,
       modelName: "Follow",

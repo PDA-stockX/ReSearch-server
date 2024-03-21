@@ -24,7 +24,6 @@ module.exports = (sequelize, DataTypes) => {
   Analyst.init(
     {
       name: DataTypes.STRING,
-      firmId: DataTypes.INTEGER,
       returnRate: DataTypes.FLOAT,
       achievementScore: DataTypes.INTEGER,
       email: DataTypes.STRING,

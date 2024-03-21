@@ -26,8 +26,8 @@ router.get("/", async (req, res, next) => {
           { id: reportIds },
           { returnRate: { [Op.gte]: req.query.returnRate } },
           { returnRate: { [Op.lte]: req.query.returnRate } },
-          { achievementRate: { [Op.gte]: req.query.achievementRate } },
-          { achievementRate: { [Op.lte]: req.query.achievementRate } },
+          { achievementScore: { [Op.gte]: req.query.achievementScore } },
+          { achievementScore: { [Op.lte]: req.query.achievementScore } },
         ],
       },
     });
@@ -42,6 +42,7 @@ router.get("/", async (req, res, next) => {
 
 // 리포트 생성 (현재 시점으로부터 1년 이상 이전 데이터만 수익률/달성률 계산)
 router.post("/", async (req, res, next) => {
+  // todo: 연관관계 맺어주기
   try {
     if (
       req.body.postedAt <=
@@ -59,8 +60,12 @@ router.post("/", async (req, res, next) => {
         req.body.targetPrice
       );
     }
+    const report = await models.Report.create(req.body);
+    res.status(201).json(report);
   } catch (err) {
-    throw err;
+    console.error(err);
+    res.status(400).json({ message: "fail" });
+    next(err);
   }
 });
 
@@ -77,8 +82,6 @@ router.get("/search", async (req, res, next) => {
       return;
     }
 
-    console.log(reportSectors[0]);
-
     const reports = await models.Report.findAll({
       where: {
         id: reportSectors.map((reportSector) => reportSector.reportId),
@@ -89,6 +92,31 @@ router.get("/search", async (req, res, next) => {
     console.error(err);
     res.status(400).json({ message: "fail" });
     next(err);
+  }
+
+  console.log(reportSectors[0]);
+
+  const reports = await models.Report.findAll({
+    where: {
+      id: reportSectors.map((reportSector) => reportSector.reportId),
+    },
+  });
+  res.json(reports);
+});
+
+router.get("/:reportId", async (req, res, next) => {
+  try {
+    const reportDetail = await models.Report.findOne({
+      include: [
+        { model: models.Firm, as: firmName, attributes: ["name"] },
+        { model: models.Analyst, as: analName, attributes: ["name"] },
+      ],
+      where: { id: req.params.reportId },
+    });
+    console.log(reportDetail);
+    res.json(reportDetail);
+  } catch (err) {
+    throw err;
   }
 });
 

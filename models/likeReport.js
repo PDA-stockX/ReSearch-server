@@ -6,12 +6,10 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.User, {
         as: "user",
         foreignKey: "userId",
-
         onDelete: "CASCADE",
       });
       this.belongsTo(models.Report, {
         as: "report",
-
         foreignKey: "reportId",
         onDelete: "CASCADE",
       });
@@ -53,10 +51,7 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   LikeReport.init(
-    {
-      userId: DataTypes.INTEGER,
-      reportId: DataTypes.INTEGER,
-    },
+    {},
     {
       sequelize,
       modelName: "LikeReport",

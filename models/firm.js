@@ -18,6 +18,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "firmId",
         onDelete: "CASCADE",
       });
+      this.hasMany(models.Analyst, {
+        as: "analysts",
+        foreignKey: "firmId",
+        onDelete: "CASCADE",
+      });
     }
   }
 

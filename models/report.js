@@ -25,7 +25,6 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-
   Report.init(
     {
       pdfUrl: DataTypes.STRING,

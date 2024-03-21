@@ -50,10 +50,7 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   DislikeReport.init(
-    {
-      userId: DataTypes.INTEGER,
-      reportId: DataTypes.INTEGER,
-    },
+    {},
     {
       sequelize,
       modelName: "DislikeReport",
