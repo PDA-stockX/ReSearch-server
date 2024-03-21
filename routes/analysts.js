@@ -116,9 +116,6 @@ router.get('/', async (req, res, next) => {
             return res.status(400).json({ message: '업종명을 제공해야 합니다.' });
         }
 
-        // 오늘 날짜
-        const today = new Date();
-
         // updateAnalystRates 함수 호출
         await updateAnalystRates();
 
@@ -175,7 +172,7 @@ router.get('/', async (req, res, next) => {
 });
 
 
-// 수익률 및 달성률에 대한 정렬 기준
+// 수익률 및 달성률에 대한 정렬 기준 //TODO: 업종명도 어디 저장해둬야 할 듯, 리포트 업데이트 할 때 새로운 업종이 있다면 추가로 저장하는 형식으로
 async function getAnalystRankings(orderBy, res) {
     try {
         // Analyst 테이블에서 name, firm, returnRate, achievementScore 가져오기
@@ -190,41 +187,38 @@ async function getAnalystRankings(orderBy, res) {
         // res.send(analystData);
 
         // Analyst 별 업종 정보 가져오기
-        await Promise.all(analystData.map(async (analyst) => {
-            // 애널리스트가 작성한 리포트들을 모두 불러옵니다.
-            const reports = await models.Report.findAll({
-                where: { analystId: analyst.id },
-                include: {
-                    model: models.ReportSector,
-                    as: 'sectors',
-                    attributes: ['sectorName'],
-                },
-            });
-            res.send(reports);
+        const sectorData = await Promise.all(analystData.map(async (analyst) => {
+            try {
+                // 애널리스트가 작성한 리포트들을 모두 불러옵니다.
+                const reports = await models.Report.findAll({
+                    where: { analystId: analyst.id },
+                    include: {
+                        model: models.ReportSector,
+                        as: 'sectors',
+                        attributes: ['sectorName'],
+                    },
+                });
+                // res.send(reports);
+                // console.log(reports);
+
+                // 리포트들에 포함된 업종명을 배열로 저장합니다.
+                const sectorNames = reports.flatMap(report => report.sectors.map(rs => rs.sectorName));
+
+                // 중복된 업종명을 제거합니다.
+                const uniqueSectorNames = Array.from(new Set(sectorNames));
+
+                return { ...analyst.toJSON(), sectorNames: uniqueSectorNames };
+            } catch (err) {
+                console.error(`Error fetching sector data for analyst ${analyst.id}:`, err);
+                // 오류가 발생한 애널리스트는 제외하고 null을 반환
+                return null;
+            }
         }));
-        
 
-        //     // 리포트들에 포함된 업종명을 배열로 저장합니다.
-        //     const sectorNames = reports.flatMap(report => report.ReportSectors.map(rs => rs.sectorName));
+        // Analyst 기준으로 정렬
+        const sortedAnalystRankings = sectorData.sort((a, b) => b[orderBy] - a[orderBy]);
 
-        //     // 중복된 업종명을 제거합니다.
-        //     analyst.sectorNames = Array.from(new Set(sectorNames));
-        // }));
-
-        // // Analyst에 대한 정보 정렬하기
-        // const sortedAnalystData = analystData.map((analyst) => ({
-        //     id: analyst.id,
-        //     name: analyst.name,
-        //     firm: analyst.Firm.name,
-        //     returnRate: analyst.returnRate,
-        //     achievementScore: analyst.achievementScore,
-        //     sectorNames: analystSectorMap[analyst.id] || [],
-        // }));
-
-        // // Analyst 기준으로 정렬
-        // const sortedAnalystRankings = sortedAnalystData.sort((a, b) => b[orderBy] - a[orderBy]);
-
-        // res.json(sortedAnalystRankings);
+        res.json(sortedAnalystRankings);
 
     } catch (err) {
         console.error(`Error retrieving analyst data (${orderBy}):`, err);
