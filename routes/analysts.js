@@ -116,33 +116,31 @@ router.get('/', async (req, res, next) => {
             return res.status(400).json({ message: '업종명을 제공해야 합니다.' });
         }
 
-        // updateAnalystRates 함수 호출
-        await updateAnalystRates();
-
         // 특정 업종에 속한 애널리스트들의 리포트 가져오기
         const analysts = await models.Analyst.findAll({
             include: [
                 {
                     model: models.Report,
                     as: 'reports',
-                    where: { // 업종명이 일치하는 리포트만 가져오도록 필터링
-                        '$reports.ReportSector.sectorName$': sectorName
-                    },
-                    attributes: ['returnRate', 'achievementScore'],
                     include: {
                         model: models.ReportSector,
-                        // as: 'ReportSector',
+                        as: 'sectors',
+                        where: {
+                            sectorName: sectorName
+                        },
                         attributes: []
                     }
                 },
                 {
                     model: models.Firm,
-                    // as: 'firm',
+                    as: 'firm',
                     attributes: ['name'],
                 },
             ],
-            attributes: ['id', 'name', 'firmId'],
+            attributes: ['id', 'name'],
         });
+
+        // res.send(analysts);
 
         // 각 애널리스트별로 평균 수익률과 평균 달성률 계산
         const analystData = analysts.map(analyst => {
@@ -159,6 +157,8 @@ router.get('/', async (req, res, next) => {
                 sector: sectorName
             };
         });
+
+        // res.send(analystData);
 
         // 일단 수익률 기준으로 정렬 (가중치 적용하기로 함)
         const sortedAnalystRankings = analystData.sort((a, b) => b.returnRate - a.returnRate);
