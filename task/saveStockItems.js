@@ -4,15 +4,14 @@ require("dotenv").config({ path: "../.env" });
 
 const data1 = fs.readFileSync('./data/data_0605_20240225.csv');
 const decoded1 = iconv.decode(data1, 'euc-kr');
-const lines = decoded1.split('\n');
+let lines = decoded1.split('\n').slice(1);
 
 const data2 = fs.readFileSync('./data/data_1749_20240225.csv');
 const decoded2 = iconv.decode(data2, 'euc-kr');
-lines.concat(decoded2.split('\n'));
+lines = lines.concat(decoded2.split('\n').slice(1));
 
 const stockItems = [];
-for (let i = 1; i < lines.length; i++) {
-    const line = lines[i];
+for (const line of lines) {
     const [itemCode, itemName, market] = line.split(',');
     stockItems.push({
         code: itemCode.replace(/"+/g, ''),
@@ -31,4 +30,3 @@ for (const stockItem of stockItems) {
         console.error(err);
     });
 }
-
