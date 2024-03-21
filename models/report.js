@@ -1,5 +1,5 @@
 "use strict";
-const { Model } = require("sequelize");
+const {Model} = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
     class Report extends Model {
         static associate(models) {
@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
             });
         }
     }
-  }
+
     Report.init({
         pdfUrl: DataTypes.STRING,
         ticker: DataTypes.STRING,
@@ -42,4 +42,4 @@ module.exports = (sequelize, DataTypes) => {
         modelName: 'Report',
     });
     return Report;
-};
+}

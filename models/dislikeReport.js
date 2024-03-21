@@ -6,13 +6,11 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.User, {
         as: "user",
         foreignKey: "userId",
-        targetKey: "userId",
         onDelete: "CASCADE",
       });
       this.belongsTo(models.Report, {
         as: "report",
         foreignKey: "reportId",
-        targetKey: "reportId",
         onDelete: "CASCADE",
       });
     }
@@ -51,11 +49,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  DislikeReport.init(
-    {
-      userId: DataTypes.INTEGER,
-      reportId: DataTypes.INTEGER,
-    },
+  DislikeReport.init({},
     {
       sequelize,
       modelName: "DislikeReport",

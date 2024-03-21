@@ -3,17 +3,14 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Follow extends Model {
     static associate(models) {
-      // define association here
       this.belongsTo(models.User, {
-        // as: "user",
+        as: "user",
         foreignKey: "userId",
-        targetKey: "userId",
         onDelete: "CASCADE",
       });
       this.belongsTo(models.Analyst, {
-        // as: "analyst",
+        as: "analyst",
         targetKey: "analystId",
-        foreignKey: "analystId",
         onDelete: "CASCADE",
       });
     }
@@ -58,11 +55,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  Follow.init(
-    {
-      userId: DataTypes.INTEGER,
-      analystId: DataTypes.INTEGER,
-    },
+  Follow.init({},
     {
       sequelize,
       modelName: "Follow",
