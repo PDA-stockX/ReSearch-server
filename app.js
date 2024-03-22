@@ -8,7 +8,7 @@ const logger = require("morgan");
 const usersRouter = require("./routes/users");
 const reportsRouter = require("./routes/reports");
 const analystRouter = require("./routes/analyst");
-
+const analystsRouter = require("./routes/analysts");
 const firmsRouter = require("./routes/firms");
 const followAnalRouter = require("./routes/followAnal");
 const likeReportRouter = require("./routes/likeReport");
@@ -35,7 +35,7 @@ app.use("/followAnal", followAnalRouter);
 app.use("/likeReport", likeReportRouter);
 app.use("/hateReport", hateReportRouter);
 app.use("/bookmark", bookmarkRouter);
-
+app.use("/analysts", analystsRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));

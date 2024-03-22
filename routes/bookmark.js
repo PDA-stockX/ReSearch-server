@@ -8,7 +8,7 @@ const { verifyToken, authenticate } = require("../services/auth");
 router.use(authenticate);
 
 router.get("/myAnal", async function (req, res, next) {
-  // console.log(req);
+  console.log(req.header);
   try {
     const myAnalList = await models.Follow.findAll({
       include: [{ model: models.Analyst, as: "analyst" }],

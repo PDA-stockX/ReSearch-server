@@ -2,9 +2,6 @@ const express = require("express");
 const router = express.Router();
 const { initModels } = require("../models/initModels");
 const { Op } = require("sequelize");
-
-const { initModels } = require("../models/initModels");
-const { Op } = require("sequelize");
 const models = initModels();
 
 // 애널리스트 정보 업데이트 : /analysts/
@@ -75,21 +72,6 @@ router.get("/search", async (req, res, next) => {
       },
     });
     res.json(analysts);
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ message: "fail" });
-    next(err);
-  }
-});
-
-router.get("/:analId", async (req, res, next) => {
-  try {
-    console.log(req.params.analId);
-    const analInfo = await models.Analyst.findOne({
-      where: { id: req.params.analId },
-    });
-    console.log(analInfo);
-    res.json(analInfo);
   } catch (err) {
     console.error(err);
     res.status(400).json({ message: "fail" });
@@ -341,6 +323,21 @@ router.get("/follower-rank", async (req, res, next) => {
   } catch (err) {
     console.error("Error retrieving analyst follower rankings:", err);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.get("/:analId", async (req, res, next) => {
+  try {
+    console.log(req.params.analId);
+    const analInfo = await models.Analyst.findOne({
+      where: { id: req.params.analId },
+    });
+    console.log(analInfo);
+    res.json(analInfo);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: "fail" });
+    next(err);
   }
 });
 
