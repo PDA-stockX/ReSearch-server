@@ -2,7 +2,6 @@ const Sequelize = require("sequelize");
 
 const sequelize = new Sequelize("re_search", "admin", "admin", {
     host: "localhost",
-    port: 3305,
     dialect: "mariadb",
 });
 
