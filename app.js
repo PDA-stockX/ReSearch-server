@@ -8,6 +8,7 @@ const logger = require("morgan");
 const usersRouter = require("./routes/users");
 const reportsRouter = require("./routes/reports");
 const analystRouter = require("./routes/analyst");
+
 const firmsRouter = require("./routes/firms");
 const followAnalRouter = require("./routes/followAnal");
 const likeReportRouter = require("./routes/likeReport");

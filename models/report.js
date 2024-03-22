@@ -23,8 +23,14 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "reportId",
         onDelete: "CASCADE",
       });
+      this.hasMany(models.ReportSector, {
+        as: "sectors",
+        foreignKey: "reportId",
+        onDelete: "CASCADE",
+      });
     }
   }
+
   Report.init(
     {
       pdfUrl: DataTypes.STRING,

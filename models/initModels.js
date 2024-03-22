@@ -15,6 +15,7 @@ const _DislikeReport = require("./dislikeReport");
 const _DislikeFirm = require("./dislikeFirm");
 const _Follow = require("./follow");
 const _ReportSector = require("./reportSector");
+const _StockItem = require("./stockItem");
 
 function initModels() {
     const User = _User(sequelize, Sequelize.DataTypes);
@@ -27,11 +28,12 @@ function initModels() {
     const DislikeFirm = _DislikeFirm(sequelize, Sequelize.DataTypes);
     const Follow = _Follow(sequelize, Sequelize.DataTypes);
     const ReportSector = _ReportSector(sequelize, Sequelize.DataTypes);
+    const StockItem = _StockItem(sequelize, Sequelize.DataTypes);
 
     User.associate({Follow});
     Firm.associate({Report, LikeFirm, DislikeFirm, Analyst});
     Analyst.associate({Report, Follow, Firm});
-    Report.associate({Firm, Analyst, LikeReport, DislikeReport});
+    Report.associate({Firm, Analyst, LikeReport, DislikeReport, ReportSector});
     LikeReport.associate({User, Report});
     DislikeReport.associate({User, Report});
     LikeFirm.associate({User, Firm});
@@ -41,15 +43,16 @@ function initModels() {
 
     return {
         User,
+        Firm,
         Analyst,
         Report,
-        Firm,
         LikeReport,
         DislikeReport,
         LikeFirm,
         DislikeFirm,
-        ReportSector,
         Follow,
+        ReportSector,
+        StockItem,
     };
 }
 
