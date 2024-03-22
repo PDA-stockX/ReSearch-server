@@ -23,6 +23,19 @@ router.get("/checkFollow", async function (req, res, next) {
   // else
 });
 router.use(authenticate);
+
+router.get("/checkMyAnal/:userId", async function (req, res, next) {
+  // try{
+  //   const analystList = await models.Analyst.findAll({
+  //     where:{
+  //       userId:req.params.userId,
+  //     }
+  //   }).then((data)=>{
+  //     console.log(data);
+  //     res.json
+  //   })
+  // }
+});
 /* GET home page. */
 router.post("/followAnal", async function (req, res, next) {
   // console.log(req);

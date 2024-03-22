@@ -4,6 +4,18 @@ const { initModels } = require("../models/initModels");
 
 const models = initModels();
 
+router.get("/checkReport/:analId", async (req, res, next) => {
+  try {
+    const response = await models.Report.findAll({
+      where: { analystId: req.params.analId },
+    });
+    console.log(response);
+    res.json(response);
+  } catch (err) {
+    throw err;
+  }
+});
+
 // 애널리스트 조회 (by search keyword)
 router.get("/:analId", async (req, res, next) => {
   try {

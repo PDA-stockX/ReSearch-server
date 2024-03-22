@@ -66,8 +66,7 @@ router.post("/verifyToken", async (req, res, next) => {
       return res.status(401).json({ message: "fail" });
     }
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "서버 오류" });
+    throw err;
   }
 });
 

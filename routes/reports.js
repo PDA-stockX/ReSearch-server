@@ -108,12 +108,12 @@ router.get("/:reportId", async (req, res, next) => {
   try {
     const reportDetail = await models.Report.findOne({
       include: [
-        { model: models.Firm, as: firmName, attributes: ["name"] },
-        { model: models.Analyst, as: analName, attributes: ["name"] },
+        { model: models.Firm, as: "firm" },
+        { model: models.Analyst, as: "analyst" },
       ],
       where: { id: req.params.reportId },
     });
-    console.log(reportDetail);
+    // console.log(reportDetail);
     res.json(reportDetail);
   } catch (err) {
     throw err;

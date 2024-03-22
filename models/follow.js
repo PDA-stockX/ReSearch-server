@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
       });
       this.belongsTo(models.Analyst, {
         as: "analyst",
-
         foreignKey: "analystId",
         onDelete: "CASCADE",
       });
