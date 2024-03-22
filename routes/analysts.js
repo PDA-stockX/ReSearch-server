@@ -7,7 +7,8 @@ const Op = sequelize.Op
 const models = initModels();
 
 
-// 애널리스트 정보 업데이트 : /analysts/  <- 배치 (리포트 가져올 때 같이 수행)
+// 애널리스트 정보 업데이트 : /analysts/  
+//TODO: <- 배치 (리포트 가져올 때 같이 수행)
 router.post('/', async (req, res, next) => {
     try {
         // Analyst 테이블의 모든 레코드 가져오기
