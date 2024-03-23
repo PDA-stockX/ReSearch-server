@@ -18,7 +18,6 @@ const reportSectorRouter = require("./routes/reportSector");
 
 const app = express();
 const cors = require("cors");
-const reportSector = require('./models/reportSector');
 app.use(cors({ origin: "*" }));
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -36,6 +35,11 @@ app.use("/analyst", analystRouter);
 app.use("/firms", firmsRouter);
 app.use("/followAnal", followAnalRouter);
 app.use("/likeReport", likeReportRouter);
+app.use("/hateReport", hateReportRouter);
+app.use("/bookmark", bookmarkRouter);
+app.use("/analysts", analystsRouter);
+app.use("/reportSector", reportSectorRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
