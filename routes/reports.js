@@ -59,7 +59,7 @@ router.get('/search', async (req, res, next) => {
         const reportSectors = await models.ReportSector.findAll({
             where: {
                 sectorName: req.query.keyword
-            }
+            },
         });
         if (reportSectors.length === 0) {
             res.json([]);
@@ -69,7 +69,13 @@ router.get('/search', async (req, res, next) => {
         const reports = await models.Report.findAll({
             where: {
                 id: reportSectors.map(reportSector => reportSector.reportId)
-            }
+            },
+            include: {
+                model: models.Analyst,
+                as: 'analyst',
+                attributes: ['name']
+            },
+            limit: 3
         });
         res.json(reports);
     } catch (err) {
