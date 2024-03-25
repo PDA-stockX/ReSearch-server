@@ -13,7 +13,12 @@ router.get('/search', async (req, res, next) => {
                 name: {
                     [Op.like]: `%${req.query.keyword}%`
                 }
-            }
+            },
+            order: [
+                ['achievementScore', 'DESC'],
+                ['returnRate', 'DESC']
+            ],
+            limit: 3
         });
         res.json(firms);
     } catch (err) {
