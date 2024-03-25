@@ -134,6 +134,7 @@ router.get("/follower-rank", async (req, res, next) => {
   }
 });
 
+
 // 업종별 애널리스트 순위 조회 : /analysts?sector={업종명}
 router.get("/", async (req, res, next) => {
   try {
@@ -172,31 +173,29 @@ router.get("/", async (req, res, next) => {
 
     // 각 애널리스트별로 평균 수익률과 평균 달성률 계산
     const analystData = analysts.map((analyst) => {
-      const totalReturnRate = analyst.reports.reduce(
-        (sum, report) => sum + report.returnRate,
-        0
-      );
-      const totalAchievementScore = analyst.reports.reduce(
-        (sum, report) => sum + report.achievementScore,
-        0
-      );
-      const averageReturnRate =
-        analyst.reports.length > 0
-          ? totalReturnRate / analyst.reports.length
-          : 0;
-      const averageAchievementScore =
-        analyst.reports.length > 0
-          ? totalAchievementScore / analyst.reports.length
-          : 0;
-      return {
-        id: analyst.id,
-        name: analyst.name,
-        firm: analyst.firm,
-        returnRate: averageReturnRate,
-        achievementScore: averageAchievementScore,
-        sector: sectorName,
-      };
-    });
+        const filteredReports = analyst.reports.filter(report => report.returnRate !== 0 || report.achievementScore !== 0);
+        const totalReturnRate = filteredReports.reduce((sum, report) => sum + report.returnRate, 0);
+        const totalAchievementScore = filteredReports.reduce((sum, report) => sum + report.achievementScore, 0);
+        const totalCount = filteredReports.length; // 필터링된 리포트 개수
+    
+        // 리포트가 없거나 모든 리포트가 returnRate와 achievementScore가 0인 경우 데이터 반환하지 않음
+        if (totalCount === 0 || (totalReturnRate === 0 && totalAchievementScore == 0)) {
+            return null;
+        }
+    
+        const averageReturnRate = totalReturnRate / totalCount;
+        const averageAchievementScore = totalAchievementScore / totalCount;
+    
+        return {
+            id: analyst.id,
+            name: analyst.name,
+            firm: analyst.firm,
+            returnRate: averageReturnRate,
+            achievementScore: averageAchievementScore,
+            sector: sectorName,
+        };
+    }).filter(data => data !== null); // null이 아닌 데이터만 필터링
+    
 
     // res.send(analystData);
 
