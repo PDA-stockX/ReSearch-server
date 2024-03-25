@@ -1,9 +1,14 @@
 const Sequelize = require("sequelize");
-
-const sequelize = new Sequelize("re_search", "admin", "admin", {
-    host: "localhost",
-    dialect: "mariadb",
+const path = require("path");
+require("dotenv").config({
+    path: path.resolve(__dirname,
+        process.env.NODE_ENV === 'development' ? '../env/.env.development'
+            : process.env.NODE_ENV === 'local' ? '../env/.env.local' : '../env/.env'
+    )
 });
+
+const sequelize = new Sequelize(`${process.env.DB_DIALECT}://${process.env.DB_USER}:${process.env.DB_PASSWORD}
+                        @${process.env.DB_HOST}/${process.env.DB_NAME}`);
 
 const _User = require("./user");
 const _Analyst = require("./analyst");
