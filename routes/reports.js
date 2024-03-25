@@ -7,6 +7,7 @@ const {
   calculateAchievementScore,
 } = require("../services/reports");
 const { Op } = require("sequelize");
+const { authenticate } = require("../services/auth");
 
 router.get("/", async (req, res, next) => {
   try {
@@ -115,6 +116,19 @@ router.get("/:reportId", async (req, res, next) => {
     });
     // console.log(reportDetail);
     res.json(reportDetail);
+  } catch (err) {
+    throw err;
+  }
+});
+router.use(authenticate);
+router.get("/search", async (req, res, next) => {
+  try {
+    console.log(req.userId);
+    const report = await models.Report.findAll({
+      where: {
+        userId: req.userId,
+      },
+    });
   } catch (err) {
     throw err;
   }
