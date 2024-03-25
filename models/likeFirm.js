@@ -50,7 +50,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  LikeFirm.init({},
+  LikeFirm.init(
+    {
+      userId: DataTypes.INTEGER,
+      firmId: DataTypes.INTEGER,
+    },
     {
       sequelize,
       modelName: "LikeFirm",

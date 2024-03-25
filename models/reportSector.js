@@ -1,23 +1,24 @@
-'use strict';
-const {
-    Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-    class ReportSector extends Model {
-        static associate(models) {
-            this.belongsTo(models.Report, {
-                as: 'report',
-                foreignKey: 'reportId',
-                onDelete: 'CASCADE'
-            });
-        }
+  class ReportSector extends Model {
+    static associate(models) {
+      this.belongsTo(models.Report, {
+        as: "report",
+        foreignKey: "reportId",
+        onDelete: "CASCADE",
+      });
     }
+  }
 
-    ReportSector.init({
-        sectorName: DataTypes.STRING
-    }, {
-        sequelize,
-        modelName: 'ReportSector',
-    });
-    return ReportSector;
+  ReportSector.init(
+    {
+      sectorName: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "ReportSector",
+    }
+  );
+  return ReportSector;
 };

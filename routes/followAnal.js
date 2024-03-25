@@ -22,18 +22,37 @@ router.get("/checkFollow", async function (req, res, next) {
   // if (cehckAnalyst) res.json({ message: "Yes" });
   // else
 });
-
 router.use(authenticate);
+
+router.get("/checkMyAnal/:userId", async function (req, res, next) {
+  // try{
+  //   const analystList = await models.Analyst.findAll({
+  //     where:{
+  //       userId:req.params.userId,
+  //     }
+  //   }).then((data)=>{
+  //     console.log(data);
+  //     res.json
+  //   })
+  // }
+});
 /* GET home page. */
-router.post("/followAnal", authenticate, async function (req, res, next) {
+router.post("/followAnal", async function (req, res, next) {
   // console.log(req);
-  const analystList = await models.Follow.create({
-    userId: req.user.id,
-    analystId: req.body.analId,
-  });
-  console.log(analystList);
-  // res.json(analystList);
-  res.json({ message: "success" });
+  try {
+    console.log(req.user.id);
+    console.log(req.body.analId);
+    const analystList = await models.Follow.create({
+      userId: req.user.id,
+      analystId: req.body.analId,
+    });
+    console.log(analystList);
+    // res.json(analystList);
+    res.json({ message: "success" });
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
 });
 router.post("/unFollowAnal", async function (req, res, next) {
   // console.log(req);

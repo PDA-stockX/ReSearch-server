@@ -49,7 +49,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  DislikeFirm.init({},
+  DislikeFirm.init(
+    {},
     {
       sequelize,
       modelName: "DislikeFirm",

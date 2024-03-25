@@ -3,6 +3,7 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Follow extends Model {
     static associate(models) {
+      // define association here
       this.belongsTo(models.User, {
         as: "user",
         foreignKey: "userId",
@@ -55,7 +56,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  Follow.init({},
+  Follow.init(
+    {
+      userId: DataTypes.INTEGER,
+      analystId: DataTypes.INTEGER,
+    },
     {
       sequelize,
       modelName: "Follow",
