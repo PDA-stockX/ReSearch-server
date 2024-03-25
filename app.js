@@ -3,15 +3,18 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
-const schedule = require("node-schedule");
-const { notifyUsersOfNewReports } = require("./services/schedule");
 
+// const indexRouter = require('./routes/index');
 const usersRouter = require("./routes/users");
 const reportsRouter = require("./routes/reports");
+const analystRouter = require("./routes/analyst");
 const analystsRouter = require("./routes/analysts");
 const firmsRouter = require("./routes/firms");
 const followAnalRouter = require("./routes/followAnal");
 const likeReportRouter = require("./routes/likeReport");
+const hateReportRouter = require("./routes/hateReport");
+const bookmarkRouter = require("./routes/bookmark");
+const reportSectorRouter = require("./routes/reportSector");
 
 const app = express();
 const cors = require("cors");
@@ -28,10 +31,15 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/users", usersRouter);
 app.use("/reports", reportsRouter);
-app.use("/analysts", analystsRouter);
+app.use("/analyst", analystRouter);
 app.use("/firms", firmsRouter);
 app.use("/followAnal", followAnalRouter);
 app.use("/likeReport", likeReportRouter);
+app.use("/hateReport", hateReportRouter);
+app.use("/bookmark", bookmarkRouter);
+app.use("/analysts", analystsRouter);
+app.use("/reportSector", reportSectorRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -49,13 +57,13 @@ app.use(function (err, req, res, next) {
   res.render("error");
 });
 
-// 매일 10시에 리포트 업데이트
-const rule = new schedule.RecurrenceRule();
-rule.hour = 10;
-rule.minute = 0;
+// // 매일 10시에 리포트 업데이트
+// const rule = new schedule.RecurrenceRule();
+// rule.hour = 10;
+// rule.minute = 0;
 
-const job = schedule.scheduleJob(rule, function () {
-  notifyUsersOfNewReports();
-});
+// const job = schedule.scheduleJob(rule, function () {
+//   notifyUsersOfNewReports();
+// });
 
 module.exports = app;

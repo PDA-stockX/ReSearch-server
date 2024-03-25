@@ -1,38 +1,43 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const models = require('../models/index');
-const {calculateReturnRate, calculateAchievementScore} = require('../services/reports');
-const {Op} = require("sequelize");
+const models = require("../models/index");
+const {
+  calculateReturnRate,
+  calculateAchievementScore,
+} = require("../services/reports");
+const { Op } = require("sequelize");
 
-router.get('/', async (req, res, next) => {
-    try {
-        const reportSectors = await models.ReportSector.findOne({
-            where: {
-                sectorName: req.query.sector
-            }
-        });
+router.get("/", async (req, res, next) => {
+  try {
+    const reportSectors = await models.ReportSector.findOne({
+      where: {
+        sectorName: req.query.sector,
+      },
+    });
 
-        const reportIds = reportSectors.map(reportSector => reportSector.reportId);
+    const reportIds = reportSectors.map(
+      (reportSector) => reportSector.reportId
+    );
 
-        const reports = await models.Report.findAll({
-            where: {
-                [Op.and]: [
-                    {id: reportIds},
-                    {returnRate: {[Op.gte]: req.query.returnRate}},
-                    {returnRate: {[Op.lte]: req.query.returnRate}},
-                    {achievementScore: {[Op.gte]: req.query.achievementScore}},
-                    {achievementScore: {[Op.lte]: req.query.achievementScore}},
-                ]
-            }
-        });
+    const reports = await models.Report.findAll({
+      where: {
+        [Op.and]: [
+          { id: reportIds },
+          { returnRate: { [Op.gte]: req.query.returnRate } },
+          { returnRate: { [Op.lte]: req.query.returnRate } },
+          { achievementScore: { [Op.gte]: req.query.achievementScore } },
+          { achievementScore: { [Op.lte]: req.query.achievementScore } },
+        ],
+      },
+    });
 
-        res.json(reports);
-    } catch (err) {
-        console.error(err);
-        res.status(400).json({message: "fail"});
-        next(err);
-    }
+    res.json(reports);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: "fail" });
+    next(err);
+  }
 });
 
 // 리포트 생성 (현재 시점으로부터 1년 이상 이전 데이터만 수익률/달성률 계산)

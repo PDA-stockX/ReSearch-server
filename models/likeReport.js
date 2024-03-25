@@ -50,7 +50,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  LikeReport.init({},
+  LikeReport.init(
+    {},
     {
       sequelize,
       modelName: "LikeReport",
