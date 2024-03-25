@@ -35,16 +35,52 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-// 리포트 생성 (현재 시점으로부터 1년 이상 이전 데이터만 수익률/달성률 계산)
+// 리포트 생성 (현재 시점으로부터 1년 이전 데이터만 수익률/달성점수 계산)
 router.post('/', async (req, res, next) => {
-    // todo: 연관관계 맺어주기
+    // todo: 애널리스트가 존재하지 않는 경우 새로운 애널리스트로 등록
     try {
-        if (req.body.postedAt <= new Date(new Date().setFullYear(new Date().getFullYear() - 1))) {
-            req.body.returnRate = await calculateReturnRate(req.body.stockName, req.body.postedAt, req.body.refPrice);
-            req.body.achievementScore = await calculateAchievementScore(req.body.stockName, req.body.postedAt,
-                req.body.refPrice, req.body.targetPrice);
+        let report = req.body.report;
+        let analyst = req.body.analyst;
+        let reportSector = req.body.reportSector;
+
+        if (report.postedAt <= new Date(new Date().setFullYear(new Date().getFullYear() - 1))) {
+            report.returnRate = await calculateReturnRate(report.stockName, report.postedAt, report.refPrice);
+            report.achievementScore = await calculateAchievementScore(report.stockName, report.postedAt,
+                report.refPrice, report.targetPrice);
         }
-        const report = await models.Report.create(req.body);
+        report = await models.Report.create({
+            ...report,
+            stockName: report.stock
+        });
+
+        const firm = await models.Firm.findOne({
+            where: {
+                name: analyst.firm
+            },
+            attributes: ['id']
+        });
+        analyst = await models.Analyst.findOne({
+            where: {
+                name: analyst.name,
+                email: analyst.email
+            },
+            attributes: ['id']
+        });
+        if (!analyst) {
+            analyst = await models.Analyst.create({
+                ...analyst,
+                firmId: firm.id
+            });
+        }
+
+        await models.Report.associations.analyst.set(report, analyst);
+        await models.Report.associations.firm.set(report, firm);
+
+        await models.ReportSector.create({
+            reportId: report.id,
+            sectorName: reportSector.sectorName
+        });
+
         res.status(201).json(report);
     } catch (err) {
         console.error(err);

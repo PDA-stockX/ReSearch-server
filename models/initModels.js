@@ -7,8 +7,14 @@ require("dotenv").config({
     )
 });
 
-const sequelize = new Sequelize(`${process.env.DB_DIALECT}://${process.env.DB_USER}:${process.env.DB_PASSWORD}
-                        @${process.env.DB_HOST}/${process.env.DB_NAME}`);
+const sequelize = new Sequelize({
+    dialect: process.env.DB_DIALECT,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+});
 
 const _User = require("./user");
 const _Analyst = require("./analyst");

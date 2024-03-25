@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     Report.init({
         pdfUrl: DataTypes.STRING,
         ticker: DataTypes.STRING,
+        stockName: DataTypes.STRING,
         investmentOpinion: DataTypes.STRING,
         postedAt: DataTypes.DATE,
         refPrice: DataTypes.INTEGER,
