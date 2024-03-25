@@ -18,7 +18,7 @@ module.exports = {
                     },
                     onDelete: 'CASCADE'
                 },
-                allowNull: false
+                allowNull: true
             },
             firmId: {
                 type: Sequelize.INTEGER,
@@ -29,18 +29,21 @@ module.exports = {
                     },
                     onDelete: 'CASCADE'
                 },
-                allowNull: false
+                allowNull: true
             },
             title: {
                 type: Sequelize.STRING
             },
             summary: {
-                type: Sequelize.STRING
+                type: Sequelize.STRING(10000),
             },
             pdfUrl: {
                 type: Sequelize.STRING
             },
             ticker: {
+                type: Sequelize.STRING
+            },
+            stockName: {
                 type: Sequelize.STRING
             },
             investmentOpinion: {

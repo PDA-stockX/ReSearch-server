@@ -31,23 +31,21 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  Report.init(
-    {
-      pdfUrl: DataTypes.STRING,
-      ticker: DataTypes.STRING,
-      investmentOpinion: DataTypes.STRING,
-      postedAt: DataTypes.DATE,
-      refPrice: DataTypes.INTEGER,
-      targetPrice: DataTypes.INTEGER,
-      returnRate: DataTypes.FLOAT,
-      achievementScore: DataTypes.INTEGER,
-      title: DataTypes.STRING,
-      summary: DataTypes.STRING,
-    },
-    {
-      sequelize,
-      modelName: "Report",
-    }
-  );
-  return Report;
-};
+    Report.init({
+        pdfUrl: DataTypes.STRING,
+        ticker: DataTypes.STRING,
+        stockName: DataTypes.STRING,
+        investmentOpinion: DataTypes.STRING,
+        postedAt: DataTypes.DATE,
+        refPrice: DataTypes.INTEGER,
+        targetPrice: DataTypes.INTEGER,
+        returnRate: DataTypes.FLOAT,
+        achievementScore: DataTypes.INTEGER,
+        title: DataTypes.STRING,
+        summary: DataTypes.STRING
+    }, {
+        sequelize,
+        modelName: 'Report',
+    });
+    return Report;
+}

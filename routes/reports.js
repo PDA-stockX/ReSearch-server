@@ -120,19 +120,6 @@ router.get("/:reportId", async (req, res, next) => {
     throw err;
   }
 });
-router.use(authenticate);
-router.get("/search", async (req, res, next) => {
-  try {
-    console.log(req.userId);
-    const report = await models.Report.findAll({
-      where: {
-        userId: req.userId,
-      },
-    });
-  } catch (err) {
-    throw err;
-  }
-});
 
 router.get("/:reportId", async (req, res, next) => {
   try {
