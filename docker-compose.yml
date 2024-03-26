@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  maria :
+  maria:
     image: docker.io/bitnami/mariadb:10.6
     container_name: re_search_mariadb
     ports:

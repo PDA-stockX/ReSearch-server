@@ -16,6 +16,7 @@ router.get("/checkReport/:analId", async (req, res, next) => {
   }
 });
 
+
 // 애널리스트 조회 (by search keyword)
 router.get("/:analId", async (req, res, next) => {
   try {
@@ -38,4 +39,5 @@ router.get("/:analId", async (req, res, next) => {
     next(err);
   }
 });
+
 module.exports = router;

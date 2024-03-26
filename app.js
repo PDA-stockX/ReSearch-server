@@ -40,7 +40,6 @@ app.use("/bookmark", bookmarkRouter);
 app.use("/analysts", analystsRouter);
 app.use("/reportSector", reportSectorRouter);
 
-
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
