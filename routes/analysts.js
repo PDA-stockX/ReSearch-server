@@ -128,7 +128,10 @@ router.get("/follower-rank", async (req, res, next) => {
         },
       ],
       group: ["Analyst.id"],
-      order: [[sequelize.literal("followerCount"), "DESC"]],
+      order: [
+        [sequelize.literal("followerCount"), "DESC"],
+        ["name", "ASC"],
+      ],
     });
 
     res.json(rankedAnalysts);
@@ -171,6 +174,7 @@ router.get("/", async (req, res, next) => {
         },
       ],
       attributes: ["id", "name"],
+      order: ["name", "ASC"],
     });
 
     // 각 애널리스트별로 평가점수 계산
