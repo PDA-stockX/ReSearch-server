@@ -237,7 +237,7 @@ router.get("/", async (req, res, next) => {
 
       const averageReturnRate = totalReturnRate / totalCount;
       const averageAchievementScore = totalAchievementScore / totalCount;
-      const score = averageReturnRate * 0.3 + averageAchievementScore * 0.5; // 평가 점수 (가중치 : 수익률 30%, 달성률 50%)
+      const score = (averageReturnRate * 0.3 + averageAchievementScore * 0.5).toFixed(2); // 평가 점수 (가중치 : 수익률 30%, 달성률 50%)
 
       scores.push({ id: analyst.id, name: analyst.name, firm: analyst.firm, returnRate: averageReturnRate, achievementScore: averageAchievementScore, sector: sectorName, score: score });
 

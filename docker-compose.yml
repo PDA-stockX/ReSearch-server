@@ -5,7 +5,7 @@ services:
     image: docker.io/bitnami/mariadb:10.6
     container_name: re_search_mariadb
     ports:
-      - 3306:3306
+      - 3305:3306
     volumes:
       - ~/docker/mariadb/etc/mysql/conf.d:/etc/mysql/conf.d:ro
       - ~/docker/mariadb/var/lib/mysql:/var/lib/mysql
