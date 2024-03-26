@@ -89,21 +89,6 @@ router.get("/search", async (req, res, next) => {
   }
 });
 
-router.get("/:analId", async (req, res, next) => {
-  try {
-    console.log(req.params.analId);
-    const analInfo = await models.Analyst.findOne({
-      where: { id: req.params.analId },
-    });
-    console.log(analInfo);
-    res.json(analInfo);
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ message: "fail" });
-    next(err);
-  }
-});
-
 // 애널리스트 정보 업데이트 : /analysts/
 //TODO: <- 배치 (리포트 가져올 때 같이 수행)
 router.post("/", async (req, res, next) => {
@@ -153,24 +138,6 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-// 애널리스트 조회 (by search keyword)
-router.get("/search", async (req, res, next) => {
-  try {
-    const analysts = await models.Analyst.findAll({
-      where: {
-        name: {
-          [Op.like]: `%${req.query.keyword}%`,
-        },
-      },
-    });
-    res.json(analysts);
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ message: "fail" });
-    next(err);
-  }
-});
-
 // 애널리스트 수익률 순위 조회 : /analysts/return-rate
 router.get("/return-rate", (req, res, next) => {
   try {
@@ -182,7 +149,11 @@ router.get("/return-rate", (req, res, next) => {
 
 // 애널리스트 달성률 순위 조회 : /analysts/achievement-score
 router.get("/achievement-score", async (req, res, next) => {
-  await getAnalystRankings("achievementScore", res);
+  try {
+    await getAnalystRankings("achievementScore", res);
+  } catch (error) {
+    console.error("Error retrieving Achievement Score", error);
+  }
 });
 
 // 애널리스트 즐겨찾기 순위 조회 : /analysts/follower-rank
@@ -345,5 +316,20 @@ async function getAnalystRankings(orderBy, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+router.get("/:analId", async (req, res, next) => {
+  try {
+    console.log(req.params.analId);
+    const analInfo = await models.Analyst.findOne({
+      where: { id: req.params.analId },
+    });
+    console.log(analInfo);
+    res.json(analInfo);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: "fail" });
+    next(err);
+  }
+});
 
 module.exports = router;
