@@ -13,9 +13,11 @@ const firmsRouter = require("./routes/firms");
 const followAnalRouter = require("./routes/followAnal");
 const likeReportRouter = require("./routes/likeReport");
 const hateReportRouter = require("./routes/hateReport");
+const likeFirmRouter = require("./routes/likeFirm");
+const hateFirmRouter = require("./routes/hateFirm");
 const bookmarkRouter = require("./routes/bookmark");
+const todayRecommendRouter = require("./routes/todayRecommend");
 const reportSectorRouter = require("./routes/reportSector");
-
 const app = express();
 const cors = require("cors");
 app.use(cors({ origin: "*" }));
@@ -39,6 +41,9 @@ app.use("/hateReport", hateReportRouter);
 app.use("/bookmark", bookmarkRouter);
 app.use("/analysts", analystsRouter);
 app.use("/reportSector", reportSectorRouter);
+app.use("/likeFirm", likeFirmRouter);
+app.use("/hateFirm", hateFirmRouter);
+app.use("/todayRecommend", todayRecommendRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

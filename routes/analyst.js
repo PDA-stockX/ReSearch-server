@@ -16,6 +16,21 @@ router.get("/checkReport/:analId", async (req, res, next) => {
   }
 });
 
+router.get("/getAnalystByFirm/:firmId", async (req, res, next) => {
+  try {
+    const response = await models.Analyst.findAll({
+      where: { firmId: req.params.firmId },
+    });
+    const sendData = [];
+    response.forEach((el) => {
+      console.log(el.dataValues);
+      sendData.push(el.id);
+    });
+    res.json(sendData);
+  } catch (err) {
+    throw err;
+  }
+});
 
 // 애널리스트 조회 (by search keyword)
 router.get("/:analId", async (req, res, next) => {
