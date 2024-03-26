@@ -26,7 +26,7 @@ router.get("/myReport", async function (req, res, next) {
   // console.log(req.body);
   // console.log(req);
   try {
-    // console.log(req.user);
+    console.log(req.user);
     const myReportList = await models.LikeReport.findAll({
       include: { model: models.Report, as: "report" },
       where: { userId: req.user.id },
@@ -50,9 +50,7 @@ router.get("/myReport", async function (req, res, next) {
     );
     console.log(SendList);
     res.json(SendList);
-  } catch (err) {
-    throw err;
-  }
+  } catch (err) {}
 });
 
 module.exports = router;
