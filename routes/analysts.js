@@ -3,6 +3,7 @@ const router = express.Router();
 const { initModels } = require("../models/initModels");
 const sequelize = require("sequelize");
 const { Op } = require("sequelize");
+const analyst = require("../models/analyst");
 
 const models = initModels();
 
@@ -178,7 +179,6 @@ router.get("/follower-rank", async (req, res, next) => {
       group: ["Analyst.id"],
       order: [[sequelize.literal("followerCount"), "DESC"]],
     });
-    console.log("a", rankedAnalysts);
 
     res.json(rankedAnalysts);
   } catch (err) {
@@ -192,6 +192,7 @@ router.get("/", async (req, res, next) => {
   try {
     // 받은 업종명
     const sectorName = req.query.sector;
+    const scores = []; // 평가 점수 저장할 배열
 
     if (!sectorName) {
       return res.status(400).json({ message: "업종명을 제공해야 합니다." });
@@ -221,48 +222,38 @@ router.get("/", async (req, res, next) => {
       attributes: ["id", "name"],
     });
 
-    // res.send(analysts);
+    // 각 애널리스트별로 평가점수 계산
+    const analystData = analysts.map((analyst) => {
+      const filteredReports = analyst.reports.filter(Boolean);
 
-    // 각 애널리스트별로 평균 수익률과 평균 달성률 계산
-    const analystData = analysts
-      .map((analyst) => {
-        const filteredReports = analyst.reports.filter((report) => report.returnRate !== 0 || report.achievementScore !== 0);
-        const totalReturnRate = filteredReports.reduce((sum, report) => sum + report.returnRate, 0);
-        const totalAchievementScore = filteredReports.reduce((sum, report) => sum + report.achievementScore, 0);
-        const totalCount = filteredReports.length; // 필터링된 리포트 개수
+      // 리포트가 없는 경우
+      if (!filteredReports.length) {
+        return;
+      }
 
-        // 리포트가 없거나 모든 리포트가 returnRate와 achievementScore가 0인 경우 데이터 반환하지 않음
-        if (totalCount === 0 || (totalReturnRate === 0 && totalAchievementScore == 0)) {
-          return null;
-        }
+      const totalReturnRate = filteredReports.reduce((sum, report) => sum + report.returnRate, 0);
+      const totalAchievementScore = filteredReports.reduce((sum, report) => sum + report.achievementScore, 0);
+      const totalCount = filteredReports.length; // 필터링된 리포트 개수
 
-        const averageReturnRate = totalReturnRate / totalCount;
-        const averageAchievementScore = totalAchievementScore / totalCount;
+      const averageReturnRate = totalReturnRate / totalCount;
+      const averageAchievementScore = totalAchievementScore / totalCount;
+      const score = averageReturnRate * 0.3 + averageAchievementScore * 0.5; // 평가 점수 (가중치 : 수익률 30%, 달성률 50%)
 
-        return {
-          id: analyst.id,
-          name: analyst.name,
-          firm: analyst.firm,
-          returnRate: averageReturnRate,
-          achievementScore: averageAchievementScore,
-          sector: sectorName,
-        };
-      })
-      .filter((data) => data !== null); // null이 아닌 데이터만 필터링
+      scores.push({ id: analyst.id, name: analyst.name, firm: analyst.firm, returnRate: averageReturnRate, achievementScore: averageAchievementScore, sector: sectorName, score: score });
 
-    // res.send(analystData);
+      return scores; //.filter((data) => data !== null);
+    });
 
-    // 일단 수익률 기준으로 정렬 (가중치 적용하기로 함)
-    const sortedAnalystRankings = analystData.sort((a, b) => b.returnRate - a.returnRate);
+    const sortedScores = scores.sort((a, b) => b.score - a.score);
 
-    res.json(sortedAnalystRankings);
+    res.json(sortedScores);
   } catch (err) {
     console.error("Error retrieving analyst data by sector:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-// 수익률 및 달성률에 대한 정렬 기준 //TODO: 업종명도 어디 저장해둬야 할 듯, 리포트 업데이트 할 때 새로운 업종이 있다면 추가로 저장하는 형식으로
+// 수익률 및 달성률에 대한 정렬 기준 //TODO: 리포트 업데이트 할 때 새로운 업종이 있다면 추가로 저장하는 형식으로
 async function getAnalystRankings(orderBy, res) {
   try {
     // Analyst 테이블에서 name, firm, returnRate, achievementScore 가져오기
@@ -290,7 +281,6 @@ async function getAnalystRankings(orderBy, res) {
             },
           });
           // res.send(reports);
-          // console.log(reports);
 
           // 리포트들에 포함된 업종명을 배열로 저장합니다.
           const sectorNames = reports.flatMap((report) => report.sectors.map((rs) => rs.sectorName));
