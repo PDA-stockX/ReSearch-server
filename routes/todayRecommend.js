@@ -11,7 +11,15 @@ router.get("/getRecommend", async (req, res, next) => {
     const analystIdArr = [3, 59, 107];
     const response = await getRankings(analystIdArr);
     console.log(response);
+
     res.json(response);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+router.get("/getTodayReport", async (req, res, next) => {
+  try {
   } catch (err) {
     console.error(err);
   }

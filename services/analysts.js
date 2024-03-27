@@ -19,6 +19,7 @@ const getRankings = async (analystIdArr) => {
       reportNum: 0,
       totalScore: 0,
       firm: "",
+      analystName: "",
     });
   });
   //   console.log(analystArr);
@@ -31,7 +32,11 @@ const getRankings = async (analystIdArr) => {
       //   "analystId",
       //   "firmId",
       // ],
-      include: [{ model: models.Firm, as: "firm" }],
+
+      include: [
+        { model: models.Firm, as: "firm" },
+        { model: models.Analyst, as: "analyst" },
+      ],
       where: {
         [Op.and]: [
           { analystId: analystIdArr },
@@ -40,6 +45,7 @@ const getRankings = async (analystIdArr) => {
         ],
       },
     });
+    console.log(response);
     // console.log(response);
     response.forEach((e) => {
       // console.log(e);
@@ -50,6 +56,7 @@ const getRankings = async (analystIdArr) => {
           el.returnRate += e.returnRate;
           el.reportNum++;
           el.firm = e.firm.dataValues.name;
+          el.analystName = e.analyst.dataValues.name;
         }
       });
     });
