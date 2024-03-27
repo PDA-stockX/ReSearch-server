@@ -1,5 +1,4 @@
 // Date Utils
-
 const getBusinessDayAround = (date) => {
     let businessDay = new Date(date);
     while (true) {
@@ -46,3 +45,18 @@ const isSameDate = (date1, date2) => {
         && date1.getMonth() === date2.getMonth()
         && date1.getDate() === date2.getDate();
 }
+
+const dateToSimpleString = (date) => {
+    let mm = date.getMonth() + 1;
+    let dd = date.getDate();
+
+    return [date.getFullYear(),
+        (mm>9 ? '' : '0') + mm,
+        (dd>9 ? '' : '0') + dd
+    ].join('');
+};
+
+module.exports = {
+    getBusinessDayAround, getOneYearLater, getOneYearAgo, getOneDayLater, getOneDayAgo, isWeekend, isSameDate,
+    dateToSimpleString
+};

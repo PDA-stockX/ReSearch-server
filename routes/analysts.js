@@ -20,7 +20,7 @@ router.get('/search', async (req, res, next) => {
                 ['achievementScore', 'DESC'],
                 ['returnRate', 'DESC']
             ],
-            limit: 3,
+            limit: 10,
         });
         if (analystsByName.length > 0) {
             return res.json(analystsByName);
@@ -42,7 +42,7 @@ router.get('/search', async (req, res, next) => {
                 ['achievementScore', 'DESC'],
                 ['returnRate', 'DESC']
             ],
-            limit: 3,
+            limit: 10,
         });
         if (analystsByFirm.length > 0) {
             return res.json(analystsByFirm);
@@ -75,7 +75,7 @@ router.get('/search', async (req, res, next) => {
                 ['achievementScore', 'DESC'],
                 ['returnRate', 'DESC']
             ],
-            limit: 3
+            limit: 10
         });
         if (analystsBySector.length > 0) {
             return res.json(analystsBySector);
@@ -104,12 +104,6 @@ router.get("/:analId", async (req, res, next) => {
     }
 });
 
-
-// 애널리스트 총 수익률, 총 달성률 추가
-async function updateAnalystRates() {
-    try {
-        // Analyst 테이블의 모든 레코드 가져오기
-        const analysts = await models.Analyst.findAll();
 // 애널리스트 정보 업데이트 : /analysts/
 //TODO: <- 배치 (리포트 가져올 때 같이 수행)
 router.post("/", async (req, res, next) => {
@@ -160,24 +154,6 @@ router.post("/", async (req, res, next) => {
       );
       res.send("success");
     }
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ message: "fail" });
-    next(err);
-  }
-});
-
-// 애널리스트 조회 (by search keyword)
-router.get("/search", async (req, res, next) => {
-  try {
-    const analysts = await models.Analyst.findAll({
-      where: {
-        name: {
-          [Op.like]: `%${req.query.keyword}%`,
-        },
-      },
-    });
-    res.json(analysts);
   } catch (err) {
     console.error(err);
     res.status(400).json({ message: "fail" });
