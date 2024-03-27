@@ -140,48 +140,6 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-// // 애널리스트 수익률 순위 조회 : /analysts/return-rate
-// router.get("/return-rate", (req, res, next) => {
-//   try {
-//     const page = parseInt(req.query.page) || 1;
-//     const perPage = parseInt(req.query.perPage) || 10;
-
-//     const offset = (page - 1) * perPage;
-
-//     getAnalystRankings("returnRate", {
-//       data: rankedAnalysts,
-//       pagination: {
-//         currentPage: page,
-//         perPage,
-//         totalPages: Math.ceil(totalAnalysts / perPage),
-//       },
-//     });
-//   } catch (error) {
-//     console.error("Error retrieving Return Rate", error);
-//   }
-// });
-
-// // 애널리스트 달성률 순위 조회 : /analysts/achievement-score
-// router.get("/achievement-score", async (req, res, next) => {
-//   try {
-//     const page = parseInt(req.query.page) || 1;
-//     const perPage = parseInt(req.query.perPage) || 10;
-
-//     const offset = (page - 1) * perPage;
-
-//     await getAnalystRankings("achievementScore", {
-//       data: rankedAnalysts,
-//       pagination: {
-//         currentPage: page,
-//         perPage,
-//         totalPages: Math.ceil(totalAnalysts / perPage),
-//       },
-//     });
-//   } catch (error) {
-//     console.error("Error retrieving Achievement Score", error);
-//   }
-// });
-
 // 애널리스트 수익률 순위 조회 : /analysts/return-rate
 router.get("/return-rate", (req, res, next) => {
   try {
@@ -266,6 +224,13 @@ router.get("/", async (req, res, next) => {
         },
       ],
       attributes: ["id", "name"],
+      group: ["Analyst.id", "Report.sectorName", "Firm.name"],
+      having: {
+        // 가장 많은 리포트를 작성한 업종만 선택 (2개 이상이면 모두 선택)
+        [models.Sequelize.fn("COUNT", "Report.sectorName")]: {
+          [models.Sequelize.Op.gte]: 1,
+        },
+      },
     });
 
     // 각 애널리스트별로 평가점수 계산
