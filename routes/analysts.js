@@ -224,7 +224,6 @@ router.get("/", async (req, res, next) => {
         },
       ],
       attributes: ["id", "name"],
-      order: ["name", "ASC"],
     });
 
     // 각 애널리스트별로 평가점수 계산
