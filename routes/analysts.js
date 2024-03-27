@@ -110,7 +110,6 @@ router.post("/", async (req, res, next) => {
           analystId: analyst.id,
         },
         attributes: ["returnRate", "achievementScore"],
-        order: ["name", "ASC"],
       });
 
       // Report 데이터에서 returnRate와 achievementScore 합산
@@ -178,10 +177,7 @@ router.get("/follower-rank", async (req, res, next) => {
         },
       ],
       group: ["Analyst.id"],
-      order: [
-        [sequelize.literal("followerCount"), "DESC"],
-        ["name", "ASC"],
-      ],
+      order: [[sequelize.literal("followerCount"), "DESC"]],
     });
 
     res.json(rankedAnalysts);
@@ -224,13 +220,6 @@ router.get("/", async (req, res, next) => {
         },
       ],
       attributes: ["id", "name"],
-      group: ["Analyst.id", "Report.sectorName", "Firm.name"],
-      having: {
-        // 가장 많은 리포트를 작성한 업종만 선택 (2개 이상이면 모두 선택)
-        [models.Sequelize.fn("COUNT", "Report.sectorName")]: {
-          [models.Sequelize.Op.gte]: 1,
-        },
-      },
     });
 
     // 각 애널리스트별로 평가점수 계산
