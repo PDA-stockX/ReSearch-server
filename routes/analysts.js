@@ -8,85 +8,23 @@ const analyst = require("../models/analyst");
 const models = initModels();
 
 // 애널리스트 조회 (by search keyword)
-router.get('/search', async (req, res, next) => {
-    try {
-        // 애널리스트 이름으로 검색
-        const analystsByName = await models.Analyst.findAll({
-            where: {
-                name: {
-                    [Op.like]: `%${req.query.keyword}%`
-                }
-            },
-            order: [
-                ['achievementScore', 'DESC'],
-                ['returnRate', 'DESC']
-            ],
-            limit: 10,
-        });
-        if (analystsByName.length > 0) {
-            return res.json(analystsByName);
-        }
-
-        // 애널리스트 소속 증권사 이름으로 검색
-        const firms = await models.Firm.findAll({
-            where: {
-                name: {
-                    [Op.like]: `%${req.query.keyword}%`
-                }
-            }
-        });
-        const analystsByFirm = await models.Analyst.findAll({
-            where: {
-                firmId: firms.map(firm => firm.id)
-            },
-            order: [
-                ['achievementScore', 'DESC'],
-                ['returnRate', 'DESC']
-            ],
-            limit: 10,
-        });
-        if (analystsByFirm.length > 0) {
-            return res.json(analystsByFirm);
-        }
-
-        // 애널리스트가 작성한 리포트의 업종명으로 검색
-        const reportSectors = await models.ReportSector.findAll({
-            where: {
-                sectorName: req.query.keyword
-            },
-        });
-        const reportsGroupedByAnalyst = await models.Report.findAll({
-            where: {
-                id: reportSectors.map(reportSector => reportSector.reportId)
-            },
-            include: {
-                model: models.Analyst,
-                as: 'analyst',
-                attributes: ['name'],
-            },
-            attributes: ['analystId', [sequelize.fn('COUNT', sequelize.col('analystId')), 'countReports']],
-            group: ['analystId'],
-            order: sequelize.literal('countReports DESC'),
-        });
-        const analystsBySector = await models.Analyst.findAll({
-            where: {
-                id: reportsGroupedByAnalyst.map(report => report.analystId)
-            },
-            order: [
-                ['achievementScore', 'DESC'],
-                ['returnRate', 'DESC']
-            ],
-            limit: 10
-        });
-        if (analystsBySector.length > 0) {
-            return res.json(analystsBySector);
-        }
-
-        res.json([]);
-    } catch (err) {
-        console.error(err);
-        res.status(400).json({message: "fail"});
-        next(err);
+router.get("/search", async (req, res, next) => {
+  try {
+    // 애널리스트 이름으로 검색
+    const analystsByName = await models.Analyst.findAll({
+      where: {
+        name: {
+          [Op.like]: `%${req.query.keyword}%`,
+        },
+      },
+      order: [
+        ["achievementScore", "DESC"],
+        ["returnRate", "DESC"],
+      ],
+      limit: 10,
+    });
+    if (analystsByName.length > 0) {
+      return res.json(analystsByName);
     }
 
     // 애널리스트 소속 증권사 이름으로 검색
@@ -105,7 +43,7 @@ router.get('/search', async (req, res, next) => {
         ["achievementScore", "DESC"],
         ["returnRate", "DESC"],
       ],
-      limit: 3,
+      limit: 10,
     });
     if (analystsByFirm.length > 0) {
       return res.json(analystsByFirm);
@@ -141,7 +79,7 @@ router.get('/search', async (req, res, next) => {
         ["achievementScore", "DESC"],
         ["returnRate", "DESC"],
       ],
-      limit: 3,
+      limit: 10,
     });
     if (analystsBySector.length > 0) {
       return res.json(analystsBySector);
@@ -153,21 +91,6 @@ router.get('/search', async (req, res, next) => {
     res.status(400).json({ message: "fail" });
     next(err);
   }
-});
-
-router.get("/:analId", async (req, res, next) => {
-    try {
-        console.log(req.params.analId);
-        const analInfo = await models.Analyst.findOne({
-            where: {id: req.params.analId},
-        });
-        console.log(analInfo);
-        res.json(analInfo);
-    } catch (err) {
-        console.error(err);
-        res.status(400).json({message: "fail"});
-        next(err);
-    }
 });
 
 // 애널리스트 정보 업데이트 : /analysts/
