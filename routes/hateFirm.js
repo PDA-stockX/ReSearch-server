@@ -5,38 +5,70 @@ const { initModels } = require("../models/initModels");
 const models = initModels();
 const { verifyToken } = require("../services/auth");
 /* GET home page. */
-router.post("/hateFirm", async function (req, res, next) {
-  // console.log(req.body);
-  const token = req.cookies["authToken"];
+const { authenticate } = require("../services/auth");
 
-  const ValidToken = verifyToken(token);
-  if (ValidToken) {
-    const destoryResult = await models.DislikeFirm.destroy({
-      where: { userId: req.body.userId, analystId: req.body.firmId },
+router.get("/checkHateNum", async function (req, res, next) {
+  try {
+    const response = await models.DislikeFirm.findAll({
+      where: { firmId: req.query.firmId },
     });
-    const Firms = await models.DislikeFirm.pressHateFirm(
-      req.body.userId,
-      req.body.firmId
-    );
-    res.json(Firms);
-  } else {
-    res.json({ message: "fail" });
+    // console.log(response);
+    res.json({ hateNum: response.length });
+  } catch (err) {
+    throw err;
   }
 });
 
-router.post("/unHateReport", async function (req, res, next) {
-  const token = req.cookies["authToken"];
+router.use(authenticate);
 
-  const ValidToken = verifyToken(token);
-  if (ValidToken) {
-    const Firm = await models.DislikeFirm.pressUnhateFirm(
-      req.body.userId,
-      req.body.firmId
-    );
-    res.json(Firm);
-  } else {
-    res.json({ message: "fail" });
+router.get("/checkHate", async function (req, res, next) {
+  try {
+    const response = await models.DislikeFirm.findOne({
+      where: { userId: req.user.id, firmId: req.query.firmId },
+    });
+    // console.log(response);
+    if (response == null) {
+      res.json({ message: "fail" });
+    } else {
+      res.json({ message: "success" });
+    }
+  } catch (err) {
+    throw err;
   }
 });
 
+router.post("/hateFirm", async function (req, res, next) {
+  try {
+    const destoryResult = await models.LikeFirm.destroy({
+      where: { userId: req.user.id, firmId: req.body.firmId },
+    });
+    console.log(destoryResult);
+    const reportLike = await models.DislikeFirm.create({
+      userId: req.user.id,
+      firmId: req.body.firmId,
+    })
+      .then(() => {
+        res.json({ massage: "success" });
+      })
+      .catch((err) => {
+        res.json({ message: fail });
+        throw err;
+      });
+  } catch (err) {
+    res.json({ message: "fail" });
+    throw err;
+  }
+});
+
+router.post("/unHateFirm", async function (req, res, next) {
+  try {
+    const destoryResult = await models.DislikeFirm.destroy({
+      where: { userId: req.user.id, firmId: req.body.firmId },
+    })
+      .then(() => res.json({ message: "success" }))
+      .catch((err) => res.json({ message: "fail" }));
+  } catch (err) {
+    res.json({ message: "fail" });
+  }
+});
 module.exports = router;
