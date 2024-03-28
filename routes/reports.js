@@ -95,11 +95,7 @@ router.post('/', async (req, res, next) => {
     }
     const report = await models.Report.create(req.body);
     res.status(201).json(report);
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ message: "fail" });
-    next(err);
-  }
+
 });
 
 // 리포트 조회 (by search keyword)
