@@ -1,57 +1,39 @@
-const { Server } = require("socket.io");
-const { initModels } = require("./models/initModels");
-const models = initModels();
+const {Server} = require("socket.io");
+const {redis} = require("./redis/redis");
 
 const io = new Server({
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
-  },
+    cors: {
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST"],
+    },
 });
 
 io.on("connection", (socket) => {
-  console.log("New client connected : " + socket.id);
+    socket.on("joinRoom", ({roomId}) => {
+        socket.join(roomId);
 
-  socket.on("connectAnalRoom", ({ analId }) => {
-    console.log("connectAnal : " + analId);
-    socket.join(analId);
-  });
-  socket.on("leaveRoom", ({ analId }) => {
-    console.log("leaveRoom : " + analId);
-    socket.leave(analId);
-  });
+        redis.zrange(`messages:${roomId}`, 0, -1)
+            .then((messages) => {
+                const data = [];
+                for (const message of messages) {
+                    data.push(JSON.parse(message));
+                }
+                socket.emit('fetchMessages', data);
+            });
+    });
 
-  socket.on("disConnectRoomd", (analId) => {
-    console.log("leaveAnal : " + analId);
-    socket.leave(analId);
-  });
-  // //Analyst 즐겨찾기추가
-  // socket.on("favoriteAnal", (userId, analId) => {
-  //   //AnalDB Follow++
-  //   const response = models.Follow.pressFollow(userId, analId);
-  //   console.log(response);
-  //   io.to(analId).emit("listenFavorite", response.likeNum);
-  // });
+    socket.on("leaveRoom", ({roomId}) => {
+        socket.leave(roomId);
+    });
 
-  // socket.on("unFavoriteAnal", (userId, analId) => {
-  //   const response = models.Follow.pressUnFollow(userId, analId);
-  //   io.to(analId).emit("listenUnFavorite", response.likeNum);
-  // });
+    socket.on("sendMessage", ({roomId, chatMessage, user}) => {
+        redis.zadd(`messages:${roomId}`, Date.now(), JSON.stringify({chatMessage, user}));
+        io.to(roomId).emit("receiveMessage", {chatMessage, user});
+    });
 
-  // //Report 좋아요 추가
-  // socket.on("LikeReport", (ReportId) => {
-  //   io.to(ReportId).emit("listenLikeReport", likeReportNum);
-  // });
-
-  socket.on("sendChat", ({ analId, chatString, user }) => {
-    console.log("sendchat : " + chatString);
-    console.log(user);
-    io.to(analId).emit("listenChat", { chatString, user });
-  });
-
-  socket.on("disconnect", (reason) => {
-    console.log(reason);
-  });
+    socket.on("disconnect", (reason) => {
+        console.log(reason);
+    });
 });
 
 module.exports = io;

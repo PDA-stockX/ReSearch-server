@@ -48,6 +48,7 @@ router.post('/', async (req, res, next) => {
         const reportSectorReq = req.body.reportSector;
 
         if (new Date(reportReq.postedAt) <= new Date(new Date().setFullYear(new Date().getFullYear() - 1))) {
+            console.log("test");
             reportReq.returnRate = await calculateReturnRate(reportReq.ticker, reportReq.postedAt, reportReq.refPrice);
             reportReq.achievementScore = await calculateAchievementScore(reportReq.ticker, reportReq.postedAt,
                 reportReq.refPrice, reportReq.targetPrice);
@@ -87,6 +88,7 @@ router.post('/', async (req, res, next) => {
 
         res.status(201).json(report);
     } catch (err) {
+        console.log(req.body);
         console.error(err);
         res.status(400).json({message: "fail"});
         next(err);
