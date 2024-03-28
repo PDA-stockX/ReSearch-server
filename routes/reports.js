@@ -43,6 +43,7 @@ router.post("/", async (req, res, next) => {
     const reportSectorReq = req.body.reportSector;
 
     if (new Date(reportReq.postedAt) <= new Date(new Date().setFullYear(new Date().getFullYear() - 1))) {
+      console.log("test");
       reportReq.returnRate = await calculateReturnRate(reportReq.ticker, reportReq.postedAt, reportReq.refPrice);
       reportReq.achievementScore = await calculateAchievementScore(reportReq.ticker, reportReq.postedAt, reportReq.refPrice, reportReq.targetPrice);
     }
@@ -81,10 +82,13 @@ router.post("/", async (req, res, next) => {
 
     res.status(201).json(report);
   } catch (err) {
+    console.log(req.body);
     console.error(err);
     res.status(400).json({ message: "fail" });
     next(err);
   }
+  const report = await models.Report.create(req.body);
+  res.status(201).json(report);
 });
 
 // 리포트 조회 (by search keyword)
@@ -128,6 +132,45 @@ router.get("/search", async (req, res, next) => {
     console.error(err);
     res.status(400).json({ message: "fail" });
     next(err);
+  }
+
+  const reports = await models.Report.findAll({
+    where: {
+      id: reportSectors.map((reportSector) => reportSector.reportId),
+    },
+  });
+  res.json(reports);
+});
+
+router.get("/:reportId", async (req, res, next) => {
+  try {
+    const reportDetail = await models.Report.findOne({
+      include: [
+        { model: models.Firm, as: "firm" },
+        { model: models.Analyst, as: "analyst" },
+      ],
+      where: { id: req.params.reportId },
+    });
+    // console.log(reportDetail);
+    res.json(reportDetail);
+  } catch (err) {
+    throw err;
+  }
+});
+
+router.get("/:reportId", async (req, res, next) => {
+  try {
+    const reportDetail = await models.Report.findOne({
+      include: [
+        { model: models.Firm, as: firmName, attributes: ["name"] },
+        { model: models.Analyst, as: analName, attributes: ["name"] },
+      ],
+      where: { id: req.params.reportId },
+    });
+    console.log(reportDetail);
+    res.json(reportDetail);
+  } catch (err) {
+    throw err;
   }
 });
 

@@ -9,7 +9,6 @@ router.get("/checkReport/:analId", async (req, res, next) => {
     const response = await models.Report.findAll({
       where: { analystId: req.params.analId },
     });
-    console.log(response);
     res.json(response);
   } catch (err) {
     throw err;
@@ -35,7 +34,6 @@ router.get("/getAnalystByFirm/:firmId", async (req, res, next) => {
 // 애널리스트 조회 (by search keyword)
 router.get("/:analId", async (req, res, next) => {
   try {
-    console.log(req.params.analId);
     const analInfo = await models.Analyst.findOne({
       include: [
         {
@@ -46,7 +44,6 @@ router.get("/:analId", async (req, res, next) => {
       ],
       where: { id: req.params.analId },
     });
-    console.log(analInfo);
     res.json(analInfo);
   } catch (err) {
     console.error(err);
