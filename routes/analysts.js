@@ -64,7 +64,10 @@ router.get("/search", async (req, res, next) => {
         as: "analyst",
         attributes: ["name"],
       },
-      attributes: ["analystId", [sequelize.fn("COUNT", sequelize.col("analystId")), "countReports"]],
+      attributes: [
+        "analystId",
+        [sequelize.fn("COUNT", sequelize.col("analystId")), "countReports"],
+      ],
       group: ["analystId"],
       order: sequelize.literal("countReports DESC"),
     });
@@ -113,12 +116,20 @@ router.post("/", async (req, res, next) => {
       });
 
       // Report 데이터에서 returnRate와 achievementScore 합산
-      const totalReturnRate = reports.reduce((sum, report) => sum + report.returnRate, 0);
-      const totalAchievementScore = reports.reduce((sum, report) => sum + report.achievementScore, 0);
+      const totalReturnRate = reports.reduce(
+        (sum, report) => sum + report.returnRate,
+        0
+      );
+      const totalAchievementScore = reports.reduce(
+        (sum, report) => sum + report.achievementScore,
+        0
+      );
 
       // returnRate와 achievementScore의 평균값 계산
-      const averageReturnRate = reports.length > 0 ? totalReturnRate / reports.length : 0;
-      const averageAchievementScore = reports.length > 0 ? totalAchievementScore / reports.length : 0;
+      const averageReturnRate =
+        reports.length > 0 ? totalReturnRate / reports.length : 0;
+      const averageAchievementScore =
+        reports.length > 0 ? totalAchievementScore / reports.length : 0;
 
       // Analyst 데이터 업데이트
       await models.Analyst.update(
@@ -162,7 +173,15 @@ router.get("/follower-rank", async (req, res, next) => {
   try {
     // 팔로워 수를 기준으로 애널리스트 정렬
     const rankedAnalysts = await models.Analyst.findAll({
-      attributes: ["id", "name", "firmId", [sequelize.fn("COUNT", sequelize.col("`follows`.userId")), "followerCount"]],
+      attributes: [
+        "id",
+        "name",
+        "firmId",
+        [
+          sequelize.fn("COUNT", sequelize.col("`follows`.userId")),
+          "followerCount",
+        ],
+      ],
       include: [
         {
           model: models.Follow,
@@ -231,15 +250,32 @@ router.get("/", async (req, res, next) => {
         return;
       }
 
-      const totalReturnRate = filteredReports.reduce((sum, report) => sum + report.returnRate, 0);
-      const totalAchievementScore = filteredReports.reduce((sum, report) => sum + report.achievementScore, 0);
+      const totalReturnRate = filteredReports.reduce(
+        (sum, report) => sum + report.returnRate,
+        0
+      );
+      const totalAchievementScore = filteredReports.reduce(
+        (sum, report) => sum + report.achievementScore,
+        0
+      );
       const totalCount = filteredReports.length; // 필터링된 리포트 개수
 
       const averageReturnRate = totalReturnRate / totalCount;
       const averageAchievementScore = totalAchievementScore / totalCount;
-      const score = (averageReturnRate * 0.3 + averageAchievementScore * 0.5).toFixed(2); // 평가 점수 (가중치 : 수익률 30%, 달성률 50%)
+      const score = (
+        averageReturnRate * 0.3 +
+        averageAchievementScore * 0.5
+      ).toFixed(2); // 평가 점수 (가중치 : 수익률 30%, 달성률 50%)
 
-      scores.push({ id: analyst.id, name: analyst.name, firm: analyst.firm, returnRate: averageReturnRate, achievementScore: averageAchievementScore, sector: sectorName, score: score });
+      scores.push({
+        id: analyst.id,
+        name: analyst.name,
+        firm: analyst.firm,
+        returnRate: averageReturnRate,
+        achievementScore: averageAchievementScore,
+        sector: sectorName,
+        score: score,
+      });
 
       return scores; //.filter((data) => data !== null);
     });
@@ -283,14 +319,19 @@ async function getAnalystRankings(orderBy, res) {
           // res.send(reports);
 
           // 리포트들에 포함된 업종명을 배열로 저장합니다.
-          const sectorNames = reports.flatMap((report) => report.sectors.map((rs) => rs.sectorName));
+          const sectorNames = reports.flatMap((report) =>
+            report.sectors.map((rs) => rs.sectorName)
+          );
 
           // 중복된 업종명을 제거합니다.
           const uniqueSectorNames = Array.from(new Set(sectorNames));
 
           return { ...analyst.toJSON(), sectorNames: uniqueSectorNames };
         } catch (err) {
-          console.error(`Error fetching sector data for analyst ${analyst.id}:`, err);
+          console.error(
+            `Error fetching sector data for analyst ${analyst.id}:`,
+            err
+          );
           // 오류가 발생한 애널리스트는 제외하고 null을 반환
           return null;
         }
@@ -298,7 +339,9 @@ async function getAnalystRankings(orderBy, res) {
     );
 
     // Analyst 기준으로 정렬
-    const sortedAnalystRankings = sectorData.sort((a, b) => b[orderBy] - a[orderBy]);
+    const sortedAnalystRankings = sectorData.sort(
+      (a, b) => b[orderBy] - a[orderBy]
+    );
 
     res.json(sortedAnalystRankings);
   } catch (err) {
