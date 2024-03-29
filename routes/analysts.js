@@ -93,63 +93,6 @@ router.get("/search", async (req, res, next) => {
   }
 });
 
-// 애널리스트 정보 업데이트 : /analysts/
-//TODO: <- 배치 (리포트 가져올 때 같이 수행)
-router.post("/", async (req, res, next) => {
-  try {
-    // Analyst 테이블의 모든 레코드 가져오기
-    const analysts = await models.Analyst.findAll();
-
-    // Analyst 별로 업데이트 수행
-    for (const analyst of analysts) {
-      // // 이미 값이 있는 경우에는 계산하지 않음
-      // if (analyst.returnRate !== null && analyst.achievementScore !== null) {
-      //     continue;
-      // }
-
-      // Analyst의 id에 해당하는 Report 데이터 가져오기
-      const reports = await models.Report.findAll({
-        where: {
-          analystId: analyst.id,
-        },
-        attributes: ["returnRate", "achievementScore"],
-      });
-
-      // Report 데이터에서 returnRate와 achievementScore 합산
-      const totalReturnRate = reports.reduce(
-        (sum, report) => sum + report.returnRate,
-        0
-      );
-      const totalAchievementScore = reports.reduce(
-        (sum, report) => sum + report.achievementScore,
-        0
-      );
-
-      // returnRate와 achievementScore의 평균값 계산
-      const averageReturnRate =
-        reports.length > 0 ? totalReturnRate / reports.length : 0;
-      const averageAchievementScore =
-        reports.length > 0 ? totalAchievementScore / reports.length : 0;
-
-      // Analyst 데이터 업데이트
-      await models.Analyst.update(
-        {
-          returnRate: averageReturnRate,
-          achievementScore: averageAchievementScore,
-        },
-        {
-          where: { id: analyst.id },
-        }
-      );
-      res.send("success");
-    }
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ message: "fail" });
-    next(err);
-  }
-});
-
 // 애널리스트 수익률 순위 조회 : /analysts/return-rate
 router.get("/return-rate", (req, res, next) => {
   try {
@@ -196,7 +139,10 @@ router.get("/follower-rank", async (req, res, next) => {
         },
       ],
       group: ["Analyst.id"],
-      order: [[sequelize.literal("followerCount"), "DESC"]],
+      order: [
+        [sequelize.literal("followerCount"), "DESC"],
+        ["name", "ASC"],
+      ],
     });
 
     res.json(rankedAnalysts);
@@ -239,6 +185,7 @@ router.get("/", async (req, res, next) => {
         },
       ],
       attributes: ["id", "name"],
+      order: ["name", "ASC"],
     });
 
     // 각 애널리스트별로 평가점수 계산
@@ -262,10 +209,7 @@ router.get("/", async (req, res, next) => {
 
       const averageReturnRate = totalReturnRate / totalCount;
       const averageAchievementScore = totalAchievementScore / totalCount;
-      const score = (
-        averageReturnRate * 0.3 +
-        averageAchievementScore * 0.5
-      ).toFixed(2); // 평가 점수 (가중치 : 수익률 30%, 달성률 50%)
+      const score = (averageReturnRate * 0.3 + averageAchievementScore * 0.5).toFixed(2); // 평가 점수 (가중치 : 수익률 30%, 달성률 50%)
 
       scores.push({
         id: analyst.id,
