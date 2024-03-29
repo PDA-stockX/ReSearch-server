@@ -40,33 +40,72 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// 리포트 생성 (현재 시점으로부터 1년 이상 이전 데이터만 수익률/달성률 계산)
+// 리포트 생성 (현재 시점으로부터 1년 이전 데이터만 수익률/달성점수 계산)
 router.post("/", async (req, res, next) => {
-  // todo: 연관관계 맺어주기
   try {
+    const reportReq = req.body.report;
+    const analystReq = req.body.analyst;
+    const reportSectorReq = req.body.reportSector;
+
     if (
-      req.body.postedAt <=
+      new Date(reportReq.postedAt) <=
       new Date(new Date().setFullYear(new Date().getFullYear() - 1))
     ) {
-      req.body.returnRate = await calculateReturnRate(
-        req.body.stockName,
-        req.body.postedAt,
-        req.body.refPrice
+      console.log("test");
+      reportReq.returnRate = await calculateReturnRate(
+        reportReq.ticker,
+        reportReq.postedAt,
+        reportReq.refPrice
       );
-      req.body.achievementScore = await calculateAchievementScore(
-        req.body.stockName,
-        req.body.postedAt,
-        req.body.refPrice,
-        req.body.targetPrice
+      reportReq.achievementScore = await calculateAchievementScore(
+        reportReq.ticker,
+        reportReq.postedAt,
+        reportReq.refPrice,
+        reportReq.targetPrice
       );
     }
-    const report = await models.Report.create(req.body);
+    const report = await models.Report.create({
+      ...reportReq,
+      stockName: reportReq.stock,
+    });
+
+    const firm = await models.Firm.findOne({
+      where: {
+        name: analystReq.firm,
+      },
+      attributes: ["id"],
+    });
+    let analyst = await models.Analyst.findOne({
+      where: {
+        name: analystReq.name,
+        email: analystReq.email,
+      },
+      attributes: ["id"],
+    });
+    if (!analyst) {
+      analyst = await models.Analyst.create({
+        ...analystReq,
+        firmId: firm.id,
+      });
+    }
+
+    await models.Report.associations.analyst.set(report, analyst);
+    await models.Report.associations.firm.set(report, firm);
+
+    await models.ReportSector.create({
+      reportId: report.id,
+      sectorName: reportSectorReq.sectorName,
+    });
+
     res.status(201).json(report);
   } catch (err) {
+    console.log(req.body);
     console.error(err);
     res.status(400).json({ message: "fail" });
     next(err);
   }
+  const report = await models.Report.create(req.body);
+  res.status(201).json(report);
 });
 
 // 리포트 조회 (by search keyword)
@@ -86,15 +125,31 @@ router.get("/search", async (req, res, next) => {
       where: {
         id: reportSectors.map((reportSector) => reportSector.reportId),
       },
+      include: [
+        {
+          model: models.Analyst,
+          as: "analyst",
+          attributes: ["name"],
+        },
+        {
+          model: models.Firm,
+          as: "firm",
+          attributes: ["name"],
+        },
+      ],
+      order: [
+        ["achievementScore", "DESC"],
+        ["returnRate", "DESC"],
+      ],
+      limit: 10,
     });
+    console.log(reports[0].analyst);
     res.json(reports);
   } catch (err) {
     console.error(err);
     res.status(400).json({ message: "fail" });
     next(err);
   }
-
-  console.log(reportSectors[0]);
 
   const reports = await models.Report.findAll({
     where: {

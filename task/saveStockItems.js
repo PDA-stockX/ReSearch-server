@@ -1,6 +1,5 @@
 const fs = require('fs');
 const iconv = require('iconv-lite');
-require("dotenv").config({ path: "../.env" });
 
 const data1 = fs.readFileSync('./data/data_0605_20240225.csv');
 const decoded1 = iconv.decode(data1, 'euc-kr');
