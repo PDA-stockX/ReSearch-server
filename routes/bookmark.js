@@ -23,15 +23,34 @@ router.get("/myAnal", async function (req, res, next) {
 });
 
 router.get("/myReport", async function (req, res, next) {
-  console.log(req.body);
+  // console.log(req.body);
+  // console.log(req);
   try {
+    console.log(req.user);
     const myReportList = await models.LikeReport.findAll({
-      include: [{ model: models.Report, as: "report" }],
-      where: { userId: req.body.userId },
+      include: { model: models.Report, as: "report" },
+      where: { userId: req.user.id },
     });
-  } catch (err) {
-    throw err;
-  }
+    // console.log(myReportList);
+
+    let SendList = await Promise.all(
+      myReportList.map(async (el) => {
+        // console.log(el.dataValues.report.dataValues.firmId);
+        const tempRes = await models.Firm.findOne({
+          where: { id: el.dataValues.report.dataValues.firmId },
+        });
+        // console.log(el.dataValues.report.dataValues);
+        const tempReturn = {
+          report: el.dataValues.report.dataValues,
+          firm: tempRes.dataValues.name,
+        };
+        console.log(tempReturn);
+        return tempReturn;
+      })
+    );
+    console.log(SendList);
+    res.json(SendList);
+  } catch (err) {}
 });
 
 module.exports = router;
