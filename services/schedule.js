@@ -2,14 +2,67 @@ const {initModels} = require('../models/initModels');
 const {fetchTodayReports} = require('../api/crawlApi');
 const {calculateReturnRate, calculateAchievementScore} = require('./reports');
 const {sendMail} = require('./mail');
+const schedule = require("node-schedule");
+const fs = require("fs");
 
 const models = initModels();
+const mockData = {
+    analysts: null,
+    follows: null,
+    reports: null
+}
 
 // 오늘 리포트 저장
 const saveTodayReports = async () => {
     try {
         const reports = await fetchTodayReports();
         return await models.Report.bulkCreate(reports);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// schedule test에 사용할 mock report 데이터 삽입
+const insertMockData = async () => {
+    const fs = require('fs');
+    try {
+        const mockAnalysts = fs.readFileSync('../task/data/MOCK_ANALYST.json');
+        const parsedMockAnalysts = JSON.parse(mockAnalysts);
+
+        const mockFollows = fs.readFileSync('../task/data/MOCK_FOLLOW.json');
+        const parsedMockFollows = JSON.parse(mockFollows);
+
+        const mockReports = fs.readFileSync('../task/data/MOCK_REPORT.json');
+        const parsedMockReports = JSON.parse(mockReports);
+
+        mockData.analysts = await models.Analyst.bulkCreate(parsedMockAnalysts);
+        mockData.follows = await models.Follow.bulkCreate(parsedMockFollows);
+        mockData.reports = await models.Report.bulkCreate(parsedMockReports);
+        return mockData.reports;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+const rollbackMockData = async () => {
+    try {
+        await models.Report.destroy({
+            where: {
+                id: mockData.reports.map(report => report.id)
+            }
+        });
+
+        await models.Follow.destroy({
+            where: {
+                id: mockData.follows.map(follow => follow.id)
+            }
+        });
+
+        await models.Analyst.destroy({
+            where: {
+                id: mockData.analysts.map(analyst => analyst.id)
+            }
+        });
     } catch (err) {
         console.error(err);
     }
@@ -40,10 +93,10 @@ const updateReport = async () => {
 }
 
 const notifyUsersOfNewReports = async () => {
-
     try {
-        await updateReport(); // 리포트 업데이트
-        const todayReports = await saveTodayReports(); // 오늘 새로 나온 리포트 저장
+        // await updateReport(); // 리포트 업데이트
+        // const todayReports = await saveTodayReports(); // 오늘 새로 나온 리포트 저장
+        const todayReports = await insertMockData();
 
         const analysts = todayReports.map(report => report.analystId);
         const follows = await models.Follow.findAll({
@@ -66,9 +119,22 @@ const notifyUsersOfNewReports = async () => {
             const analysts = userWithAnalysts[userId];
             sendMail(user, analysts);
         }
+
+        // todo: 테스트 완료 후 주석처리
+        await rollbackMockData();
     } catch (err) {
         console.error(err);
     }
 }
 
-module.exports = {notifyUserOfNewReports: notifyUsersOfNewReports};
+const setSchedule = (fn) => {
+    const rule = new schedule.RecurrenceRule();
+    rule.hour = 10;
+    rule.minute = 0;
+
+    return schedule.scheduleJob(rule, function () {
+        fn();
+    });
+}
+
+module.exports = {notifyUsersOfNewReports, setSchedule};

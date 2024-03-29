@@ -4,7 +4,6 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 
-// const indexRouter = require('./routes/index');
 const usersRouter = require("./routes/users");
 const reportsRouter = require("./routes/reports");
 const analystRouter = require("./routes/analyst");
@@ -19,9 +18,6 @@ const reportSectorRouter = require("./routes/reportSector");
 const app = express();
 const cors = require("cors");
 app.use(cors({ origin: "*" }));
-// view engine setup
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "pug");
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -56,14 +52,5 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
-
-// // 매일 10시에 리포트 업데이트
-// const rule = new schedule.RecurrenceRule();
-// rule.hour = 10;
-// rule.minute = 0;
-
-// const job = schedule.scheduleJob(rule, function () {
-//   notifyUsersOfNewReports();
-// });
 
 module.exports = app;
