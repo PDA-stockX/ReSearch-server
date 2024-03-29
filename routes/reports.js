@@ -2,7 +2,10 @@ const express = require("express");
 const router = express.Router();
 
 const models = require("../models/index");
-const { calculateReturnRate, calculateAchievementScore } = require("../services/reports");
+const {
+  calculateReturnRate,
+  calculateAchievementScore,
+} = require("../services/reports");
 const { Op } = require("sequelize");
 
 router.get("/", async (req, res, next) => {
@@ -13,7 +16,9 @@ router.get("/", async (req, res, next) => {
       },
     });
 
-    const reportIds = reportSectors.map((reportSector) => reportSector.reportId);
+    const reportIds = reportSectors.map(
+      (reportSector) => reportSector.reportId
+    );
 
     const reports = await models.Report.findAll({
       where: {
@@ -42,10 +47,22 @@ router.post("/", async (req, res, next) => {
     const analystReq = req.body.analyst;
     const reportSectorReq = req.body.reportSector;
 
-    if (new Date(reportReq.postedAt) <= new Date(new Date().setFullYear(new Date().getFullYear() - 1))) {
+    if (
+      new Date(reportReq.postedAt) <=
+      new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+    ) {
       console.log("test");
-      reportReq.returnRate = await calculateReturnRate(reportReq.ticker, reportReq.postedAt, reportReq.refPrice);
-      reportReq.achievementScore = await calculateAchievementScore(reportReq.ticker, reportReq.postedAt, reportReq.refPrice, reportReq.targetPrice);
+      reportReq.returnRate = await calculateReturnRate(
+        reportReq.ticker,
+        reportReq.postedAt,
+        reportReq.refPrice
+      );
+      reportReq.achievementScore = await calculateAchievementScore(
+        reportReq.ticker,
+        reportReq.postedAt,
+        reportReq.refPrice,
+        reportReq.targetPrice
+      );
     }
     const report = await models.Report.create({
       ...reportReq,
