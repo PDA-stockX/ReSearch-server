@@ -158,11 +158,9 @@ router.get("/", async (req, res, next) => {
     // 받은 업종명
     const sectorName = req.query.sector;
     const scores = []; // 평가 점수 저장할 배열
-
     if (!sectorName) {
       return res.status(400).json({ message: "업종명을 제공해야 합니다." });
     }
-
     // 특정 업종에 속한 애널리스트들의 리포트 가져오기
     const analysts = await models.Analyst.findAll({
       include: [
@@ -185,7 +183,6 @@ router.get("/", async (req, res, next) => {
         },
       ],
       attributes: ["id", "name"],
-      order: ["name", "ASC"],
     });
 
     // 각 애널리스트별로 평가점수 계산
