@@ -8,130 +8,84 @@ const analyst = require("../models/analyst");
 const models = initModels();
 
 // 애널리스트 조회 (by search keyword)
-router.get('/search', async (req, res, next) => {
-    try {
-        // 애널리스트 이름으로 검색
-        const analystsByName = await models.Analyst.findAll({
-            where: {
-                name: {
-                    [Op.like]: `%${req.query.keyword}%`
-                }
-            },
-            order: [
-                ['achievementScore', 'DESC'],
-                ['returnRate', 'DESC']
-            ],
-            limit: 10,
-        });
-        if (analystsByName.length > 0) {
-            return res.json(analystsByName);
-        }
+router.get("/search", async (req, res, next) => {
+  try {
+    // 애널리스트 이름으로 검색
+    const analystsByName = await models.Analyst.findAll({
+      where: {
+        name: {
+          [Op.like]: `%${req.query.keyword}%`,
+        },
+      },
+      order: [
+        ["achievementScore", "DESC"],
+        ["returnRate", "DESC"],
+      ],
+      limit: 10,
+    });
+    if (analystsByName.length > 0) {
+      return res.json(analystsByName);
+    }
 
-        // 애널리스트 소속 증권사 이름으로 검색
-        const firms = await models.Firm.findAll({
-            where: {
-                name: {
-                    [Op.like]: `%${req.query.keyword}%`
-                }
-            }
-        });
-        const analystsByFirm = await models.Analyst.findAll({
-            where: {
-                firmId: firms.map(firm => firm.id)
-            },
-            order: [
-                ['achievementScore', 'DESC'],
-                ['returnRate', 'DESC']
-            ],
-            limit: 10,
-        });
-        if (analystsByFirm.length > 0) {
-            return res.json(analystsByFirm);
-        }
+    // 애널리스트 소속 증권사 이름으로 검색
+    const firms = await models.Firm.findAll({
+      where: {
+        name: {
+          [Op.like]: `%${req.query.keyword}%`,
+        },
+      },
+    });
+    const analystsByFirm = await models.Analyst.findAll({
+      where: {
+        firmId: firms.map((firm) => firm.id),
+      },
+      order: [
+        ["achievementScore", "DESC"],
+        ["returnRate", "DESC"],
+      ],
+      limit: 10,
+    });
+    if (analystsByFirm.length > 0) {
+      return res.json(analystsByFirm);
+    }
 
-        // 애널리스트가 작성한 리포트의 업종명으로 검색
-        const reportSectors = await models.ReportSector.findAll({
-            where: {
-                sectorName: req.query.keyword
-            },
-        });
-        const reportsGroupedByAnalyst = await models.Report.findAll({
-            where: {
-                id: reportSectors.map(reportSector => reportSector.reportId)
-            },
-            include: {
-                model: models.Analyst,
-                as: 'analyst',
-                attributes: ['name'],
-            },
-            attributes: ['analystId', [sequelize.fn('COUNT', sequelize.col('analystId')), 'countReports']],
-            group: ['analystId'],
-            order: sequelize.literal('countReports DESC'),
-        });
-        const analystsBySector = await models.Analyst.findAll({
-            where: {
-                id: reportsGroupedByAnalyst.map(report => report.analystId)
-            },
-            order: [
-                ['achievementScore', 'DESC'],
-                ['returnRate', 'DESC']
-            ],
-            limit: 10
-        });
-        if (analystsBySector.length > 0) {
-            return res.json(analystsBySector);
-        }
+    // 애널리스트가 작성한 리포트의 업종명으로 검색
+    const reportSectors = await models.ReportSector.findAll({
+      where: {
+        sectorName: req.query.keyword,
+      },
+    });
+    const reportsGroupedByAnalyst = await models.Report.findAll({
+      where: {
+        id: reportSectors.map((reportSector) => reportSector.reportId),
+      },
+      include: {
+        model: models.Analyst,
+        as: "analyst",
+        attributes: ["name"],
+      },
+      attributes: [
+        "analystId",
+        [sequelize.fn("COUNT", sequelize.col("analystId")), "countReports"],
+      ],
+      group: ["analystId"],
+      order: sequelize.literal("countReports DESC"),
+    });
+    const analystsBySector = await models.Analyst.findAll({
+      where: {
+        id: reportsGroupedByAnalyst.map((report) => report.analystId),
+      },
+      order: [
+        ["achievementScore", "DESC"],
+        ["returnRate", "DESC"],
+      ],
+      limit: 10,
+    });
+    if (analystsBySector.length > 0) {
+      return res.json(analystsBySector);
+    }
 
     res.json([]);
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ message: "fail" });
-    next(err);
-  }
-});
-
-// 애널리스트 정보 업데이트 : /analysts/
-//TODO: <- 배치 (리포트 가져올 때 같이 수행)
-router.post("/", async (req, res, next) => {
-  try {
-    // Analyst 테이블의 모든 레코드 가져오기
-    const analysts = await models.Analyst.findAll();
-
-    // Analyst 별로 업데이트 수행
-    for (const analyst of analysts) {
-      // // 이미 값이 있는 경우에는 계산하지 않음
-      // if (analyst.returnRate !== null && analyst.achievementScore !== null) {
-      //     continue;
-      // }
-
-      // Analyst의 id에 해당하는 Report 데이터 가져오기
-      const reports = await models.Report.findAll({
-        where: {
-          analystId: analyst.id,
-        },
-        attributes: ["returnRate", "achievementScore"],
-      });
-
-      // Report 데이터에서 returnRate와 achievementScore 합산
-      const totalReturnRate = reports.reduce((sum, report) => sum + report.returnRate, 0);
-      const totalAchievementScore = reports.reduce((sum, report) => sum + report.achievementScore, 0);
-
-      // returnRate와 achievementScore의 평균값 계산
-      const averageReturnRate = reports.length > 0 ? totalReturnRate / reports.length : 0;
-      const averageAchievementScore = reports.length > 0 ? totalAchievementScore / reports.length : 0;
-
-      // Analyst 데이터 업데이트
-      await models.Analyst.update(
-        {
-          returnRate: averageReturnRate,
-          achievementScore: averageAchievementScore,
-        },
-        {
-          where: { id: analyst.id },
-        }
-      );
-      res.send("success");
-    }
   } catch (err) {
     console.error(err);
     res.status(400).json({ message: "fail" });
@@ -162,7 +116,15 @@ router.get("/follower-rank", async (req, res, next) => {
   try {
     // 팔로워 수를 기준으로 애널리스트 정렬
     const rankedAnalysts = await models.Analyst.findAll({
-      attributes: ["id", "name", "firmId", [sequelize.fn("COUNT", sequelize.col("`follows`.userId")), "followerCount"]],
+      attributes: [
+        "id",
+        "name",
+        "firmId",
+        [
+          sequelize.fn("COUNT", sequelize.col("`follows`.userId")),
+          "followerCount",
+        ],
+      ],
       include: [
         {
           model: models.Follow,
@@ -177,7 +139,10 @@ router.get("/follower-rank", async (req, res, next) => {
         },
       ],
       group: ["Analyst.id"],
-      order: [[sequelize.literal("followerCount"), "DESC"]],
+      order: [
+        [sequelize.literal("followerCount"), "DESC"],
+        ["name", "ASC"],
+      ],
     });
 
     res.json(rankedAnalysts);
@@ -193,11 +158,9 @@ router.get("/", async (req, res, next) => {
     // 받은 업종명
     const sectorName = req.query.sector;
     const scores = []; // 평가 점수 저장할 배열
-
     if (!sectorName) {
       return res.status(400).json({ message: "업종명을 제공해야 합니다." });
     }
-
     // 특정 업종에 속한 애널리스트들의 리포트 가져오기
     const analysts = await models.Analyst.findAll({
       include: [
@@ -231,15 +194,29 @@ router.get("/", async (req, res, next) => {
         return;
       }
 
-      const totalReturnRate = filteredReports.reduce((sum, report) => sum + report.returnRate, 0);
-      const totalAchievementScore = filteredReports.reduce((sum, report) => sum + report.achievementScore, 0);
+      const totalReturnRate = filteredReports.reduce(
+        (sum, report) => sum + report.returnRate,
+        0
+      );
+      const totalAchievementScore = filteredReports.reduce(
+        (sum, report) => sum + report.achievementScore,
+        0
+      );
       const totalCount = filteredReports.length; // 필터링된 리포트 개수
 
       const averageReturnRate = totalReturnRate / totalCount;
       const averageAchievementScore = totalAchievementScore / totalCount;
       const score = (averageReturnRate * 0.3 + averageAchievementScore * 0.5).toFixed(2); // 평가 점수 (가중치 : 수익률 30%, 달성률 50%)
 
-      scores.push({ id: analyst.id, name: analyst.name, firm: analyst.firm, returnRate: averageReturnRate, achievementScore: averageAchievementScore, sector: sectorName, score: score });
+      scores.push({
+        id: analyst.id,
+        name: analyst.name,
+        firm: analyst.firm,
+        returnRate: averageReturnRate,
+        achievementScore: averageAchievementScore,
+        sector: sectorName,
+        score: score,
+      });
 
       return scores; //.filter((data) => data !== null);
     });
@@ -283,14 +260,19 @@ async function getAnalystRankings(orderBy, res) {
           // res.send(reports);
 
           // 리포트들에 포함된 업종명을 배열로 저장합니다.
-          const sectorNames = reports.flatMap((report) => report.sectors.map((rs) => rs.sectorName));
+          const sectorNames = reports.flatMap((report) =>
+            report.sectors.map((rs) => rs.sectorName)
+          );
 
           // 중복된 업종명을 제거합니다.
           const uniqueSectorNames = Array.from(new Set(sectorNames));
 
           return { ...analyst.toJSON(), sectorNames: uniqueSectorNames };
         } catch (err) {
-          console.error(`Error fetching sector data for analyst ${analyst.id}:`, err);
+          console.error(
+            `Error fetching sector data for analyst ${analyst.id}:`,
+            err
+          );
           // 오류가 발생한 애널리스트는 제외하고 null을 반환
           return null;
         }
@@ -298,7 +280,9 @@ async function getAnalystRankings(orderBy, res) {
     );
 
     // Analyst 기준으로 정렬
-    const sortedAnalystRankings = sectorData.sort((a, b) => b[orderBy] - a[orderBy]);
+    const sortedAnalystRankings = sectorData.sort(
+      (a, b) => b[orderBy] - a[orderBy]
+    );
 
     res.json(sortedAnalystRankings);
   } catch (err) {

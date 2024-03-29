@@ -4,7 +4,6 @@ const { initModels } = require("../models/initModels");
 const sequelize = require("sequelize");
 const { Op } = require("sequelize");
 const firm = require("../models/firm");
-
 const models = initModels();
 
 // 증권사 조회 (by search keyword)

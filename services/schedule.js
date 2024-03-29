@@ -93,10 +93,10 @@ const updateReport = async () => {
 }
 
 const notifyUsersOfNewReports = async () => {
-    try {
-        // await updateReport(); // 리포트 업데이트
-        // const todayReports = await saveTodayReports(); // 오늘 새로 나온 리포트 저장
-        const todayReports = await insertMockData();
+  try {
+    await updateReport(); // 리포트 업데이트
+    await updateAnalyst(); // 애널리스트 업데이트
+    const todayReports = await saveTodayReports(); // 오늘 새로 나온 리포트 저장
 
         const analysts = todayReports.map(report => report.analystId);
         const follows = await models.Follow.findAll({
@@ -119,9 +119,6 @@ const notifyUsersOfNewReports = async () => {
             const analysts = userWithAnalysts[userId];
             sendMail(user, analysts);
         }
-
-        // todo: 테스트 완료 후 주석처리
-        await rollbackMockData();
     } catch (err) {
         console.error(err);
     }
