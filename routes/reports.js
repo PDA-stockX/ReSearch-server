@@ -97,7 +97,8 @@ router.post("/", async (req, res, next) => {
       sectorName: reportSectorReq.sectorName,
     });
 
-    res.status(201).json(report);
+    return res.status(201).json(report);
+    console.log("-------------------------------------------")
   } catch (err) {
     console.log(req.body);
     console.error(err);
