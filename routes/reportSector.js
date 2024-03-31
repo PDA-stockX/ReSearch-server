@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { initModels } = require("../models/initModels");
 const sequelize = require("sequelize");
-const models = initModels();
+const models = require("../models/index");
 
 // 업종명 조회 : /reportSector
 router.get('/', async (req, res, next) => {

@@ -2,8 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { createToken, verifyToken } = require("../services/auth");
 
-const { initModels } = require("../models/initModels");
-const models = initModels();
+const models = require("../models/index");
 
 router.post("/sign-up", async (req, res, next) => {
   try {

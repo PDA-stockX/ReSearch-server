@@ -19,6 +19,7 @@ const todayRecommendRouter = require("./routes/todayRecommend");
 const reportSectorRouter = require("./routes/reportSector");
 const app = express();
 const cors = require("cors");
+const {setSchedule, updateReports, updateAnalysts, updateFirms, notifyUsersOfNewReports} = require("./services/schedule");
 app.use(cors({ origin: "*" }));
 
 app.use(logger("dev"));
@@ -56,5 +57,8 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
+
+// 매일 오전 10시 15분에 리포트, 애널리스트, 증권사 업데이트, 새 리포트 알림
+setSchedule({hour: 10, minute: 15}, updateReports, updateAnalysts, updateFirms, notifyUsersOfNewReports);
 
 module.exports = app;

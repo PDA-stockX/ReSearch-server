@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { initModels } = require("../models/initModels");
+const models = require("../models/index");
 
-const models = initModels();
 
 router.get("/checkReport/:analId", async (req, res, next) => {
   try {
