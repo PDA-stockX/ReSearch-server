@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { initModels } = require("../models/initModels");
 const sequelize = require("sequelize");
 const { Op } = require("sequelize");
-const analyst = require("../models/analyst");
 
-const models = initModels();
+const models = require("../models/index");
 
 // 애널리스트 조회 (by search keyword)
 router.get("/search", async (req, res, next) => {

@@ -2,8 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { createToken, verifyToken } = require("../services/auth");
 
-const { initModels } = require("../models/initModels");
-const models = initModels();
+const models = require("../models/index");
 
 router.post("/sign-up", async (req, res, next) => {
   try {
@@ -11,8 +10,8 @@ router.post("/sign-up", async (req, res, next) => {
     const user = await models.User.signUp(email, password, name, nickname);
     res.status(201).json({ message: "success" });
   } catch (err) {
-    console.log(err.errors[0].message);
-    res.status(400).json({ message: err.errors[0].message });
+    console.error(err);
+    res.status(400).json({ message: "fail" });
     next(err);
   }
 });

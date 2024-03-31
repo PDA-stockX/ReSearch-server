@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
-var Sequelize = require("sequelize");
-const models = require("../models/index");
-const { Op } = require("sequelize");
+
 const { getRankings } = require("../services/analysts");
 
 router.get("/getRecommend", async (req, res, next) => {

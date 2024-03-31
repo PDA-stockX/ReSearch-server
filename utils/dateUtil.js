@@ -56,7 +56,15 @@ const dateToSimpleString = (date) => {
     ].join('');
 };
 
+const startOfDay = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+}
+
+const endOfDay = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+}
+
 module.exports = {
     getBusinessDayAround, getOneYearLater, getOneYearAgo, getOneDayLater, getOneDayAgo, isWeekend, isSameDate,
-    dateToSimpleString
+    dateToSimpleString, startOfDay, endOfDay
 };

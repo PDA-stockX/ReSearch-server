@@ -1,75 +1,15 @@
-const {initModels} = require('../models/initModels');
-const {fetchTodayReports} = require('../api/crawlApi');
 const {calculateReturnRate, calculateAchievementScore} = require('./reports');
 const {sendMail} = require('./mail');
+const models = require('../models/index');
 const schedule = require("node-schedule");
-const fs = require("fs");
+const {startOfDay, endOfDay} = require("../utils/dateUtil");
+const {Op} = require("sequelize");
 
-const models = initModels();
-const mockData = {
-    analysts: null,
-    follows: null,
-    reports: null
-}
-
-// 오늘 리포트 저장
-const saveTodayReports = async () => {
-    try {
-        const reports = await fetchTodayReports();
-        return await models.Report.bulkCreate(reports);
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// schedule test에 사용할 mock report 데이터 삽입
-const insertMockData = async () => {
-    const fs = require('fs');
-    try {
-        const mockAnalysts = fs.readFileSync('../task/data/MOCK_ANALYST.json');
-        const parsedMockAnalysts = JSON.parse(mockAnalysts);
-
-        const mockFollows = fs.readFileSync('../task/data/MOCK_FOLLOW.json');
-        const parsedMockFollows = JSON.parse(mockFollows);
-
-        const mockReports = fs.readFileSync('../task/data/MOCK_REPORT.json');
-        const parsedMockReports = JSON.parse(mockReports);
-
-        mockData.analysts = await models.Analyst.bulkCreate(parsedMockAnalysts);
-        mockData.follows = await models.Follow.bulkCreate(parsedMockFollows);
-        mockData.reports = await models.Report.bulkCreate(parsedMockReports);
-        return mockData.reports;
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-const rollbackMockData = async () => {
-    try {
-        await models.Report.destroy({
-            where: {
-                id: mockData.reports.map(report => report.id)
-            }
-        });
-
-        await models.Follow.destroy({
-            where: {
-                id: mockData.follows.map(follow => follow.id)
-            }
-        });
-
-        await models.Analyst.destroy({
-            where: {
-                id: mockData.analysts.map(analyst => analyst.id)
-            }
-        });
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// 리포트 업데이트 (수익률/달성률 계산)
-const updateReport = async () => {
+/**
+ * 리포트 업데이트 (수익률/달성점수 계산)
+ * @returns {Promise<void>}
+ */
+async function updateReports() {
     try {
         const reports = await models.Report.findAll({
             where: {
@@ -80,9 +20,15 @@ const updateReport = async () => {
 
         const toUpdate = reports.filter(report => report.postedAt <= reports[0].postedAt);
         for (const report of toUpdate) {
-            report.returnRate = await calculateReturnRate(report.stockName, report.postedAt, report.refPrice);
-            report.achievementScore = await calculateAchievementScore(report.stockName, report.postedAt,
-                report.refPrice, report.targetPrice);
+            report.returnRate = await calculateReturnRate(
+                report.stockName,
+                report.postedAt,
+                report.refPrice);
+            report.achievementScore = await calculateAchievementScore(
+                report.stockName,
+                report.postedAt,
+                report.refPrice,
+                report.targetPrice);
         }
         await models.Report.bulkCreate(toUpdate, {
             updateOnDuplicate: ['id']
@@ -92,46 +38,143 @@ const updateReport = async () => {
     }
 }
 
-const notifyUsersOfNewReports = async () => {
-  try {
-    await updateReport(); // 리포트 업데이트
-    await updateAnalyst(); // 애널리스트 업데이트
-    const todayReports = await saveTodayReports(); // 오늘 새로 나온 리포트 저장
+/**
+ * 애널리스트 업데이트 (수익률/달성점수 계산)
+ * @returns {Promise<void>}
+ */
+async function updateAnalysts() {
+    try {
+        const analysts = await models.Analyst.findAll();
 
-        const analysts = todayReports.map(report => report.analystId);
-        const follows = await models.Follow.findAll({
+        for (const analyst of analysts) {
+            const reports = await models.Report.findAll({
+                where: {
+                    analystId: analyst.id,
+                },
+                attributes: ["returnRate", "achievementScore"],
+            });
+
+            const {averageReturnRate, averageAchievementScore} = calculateEvaluation(reports);
+
+            analyst.returnRate = averageReturnRate;
+            analyst.achievementScore = averageAchievementScore;
+        }
+        await models.Analyst.bulkCreate(analysts, {
+            updateOnDuplicate: ['id']
+        });
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+/**
+ * 증권사 업데이트 (수익률/달성점수 계산)
+ * @returns {Promise<void>}
+ */
+async function updateFirms() {
+    try {
+        const firms = await models.Firm.findAll();
+
+        for (const firm of firms) {
+            const analysts = await models.Analyst.findAll({
+                where: {
+                    firmId: firm.id,
+                },
+                attributes: ["returnRate", "achievementScore"],
+            });
+
+            const {averageReturnRate, averageAchievementScore} = calculateEvaluation(analysts);
+
+            firm.returnRate = averageReturnRate;
+            firm.achievementScore = averageAchievementScore;
+        }
+        await models.Firm.bulkCreate(firms, {
+            updateOnDuplicate: ['id']
+        });
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+/**
+ * 즐겨찾기 애널리스트의 새 리포트가 등록되었을 때 사용자에게 알림
+ * @returns {Promise<void>}
+ */
+async function notifyUsersOfNewReports() {
+    try {
+        // 오늘 작성된 리포트
+        const reports = await models.Report.findAll({
             where: {
-                analystId: analysts
+                createdAt: {
+                    [Op.gte]: startOfDay(new Date()),
+                    [Op.lte]: endOfDay(new Date())
+                }
             },
         });
 
+        // 리포트를 작성한 애널리스트를 팔로우하는 사용자
+        const follows = await models.Follow.findAll({
+            where: {
+                analystId: reports.map(report => report.analystId)
+            },
+        });
         const userWithAnalysts = follows.reduce((acc, follow) => {
             if (!acc[follow.userId]) {
-                acc[follow.userId] = [];
+                acc[follow.userId] = new Set();
             }
-            acc[follow.userId].push(follow.analystId);
+            acc[follow.userId].add(follow.analystId);
             return acc;
         }, {});
 
         // 사용자에게 알림
         for (const userId in userWithAnalysts) {
             const user = await models.User.findByPk(userId);
-            const analysts = userWithAnalysts[userId];
+            const analysts = await models.Analyst.findAll({
+                where: {
+                    id: Array.from(userWithAnalysts[userId])
+                }
+            });
             sendMail(user, analysts);
         }
+
     } catch (err) {
         console.error(err);
     }
 }
 
-const setSchedule = (fn) => {
-    const rule = new schedule.RecurrenceRule();
-    rule.hour = 10;
-    rule.minute = 0;
+/**
+ * 수익률, 달성점수 계산
+ * @param obj
+ * @returns {{averageReturnRate: number, averageAchievementScore: number}}
+ */
+function calculateEvaluation(obj) {
+    const totalReturnRate = obj.reduce((sum, report) => sum + report.returnRate, 0);
+    const totalAchievementScore = obj.reduce((sum, report) => sum + report.achievementScore, 0);
+    const averageReturnRate = obj.length > 0 ? totalReturnRate / obj.length : null;
+    const averageAchievementScore = obj.length > 0 ? totalAchievementScore / obj.length : null;
+    return {averageReturnRate, averageAchievementScore};
+}
 
-    return schedule.scheduleJob(rule, function () {
-        fn();
+/**
+ * 스케줄 설정
+ * @param time
+ * @param callback (입력 순서대로 실행)
+ * @returns {Job}
+ */
+function setSchedule(time, ...callback) {
+    const rule = new schedule.RecurrenceRule();
+    rule.hour = time.hour;
+    rule.minute = time.minute;
+
+    return schedule.scheduleJob(rule, async function () {
+        try {
+            for (const cb of callback) {
+                await cb();
+            }
+        } catch (err) {
+            console.error(err);
+        }
     });
 }
 
-module.exports = {notifyUsersOfNewReports, setSchedule};
+module.exports = {updateReports, updateAnalysts, updateFirms, notifyUsersOfNewReports, setSchedule};
