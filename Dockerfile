@@ -4,8 +4,8 @@ RUN mkdir -p /research-server
 WORKDIR /research-server
 ADD . /research-server
 RUN npm install
+RUN npx sequelize-cli db:migrate --env "production"
 
 EXPOSE 3000
 
-CMD ["npx", "sequelize-cli", "db:migrate", "--env", "production"]
 CMD ["npm", "run", "start:prod"]
