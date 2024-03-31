@@ -8,4 +8,4 @@ RUN npm install
 EXPOSE 3000
 
 CMD ["npx", "sequelize-cli", "db:migrate", "--env", "production"]
-CMD ["npm", "start"]
+CMD ["npm", "start:prod"]
