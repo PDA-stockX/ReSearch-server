@@ -5,8 +5,6 @@ WORKDIR /research-server
 ADD . /research-server
 RUN npm install
 
-ENV NODE_ENV development
-
 EXPOSE 3000
 
 CMD ["npx", "sequelize-cli", "db:migrate"]
