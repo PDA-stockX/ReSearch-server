@@ -9,4 +9,5 @@ ENV NODE_ENV development
 
 EXPOSE 3000
 
+CMD ["npx", "sequelize-cli", "db:migrate"]
 CMD ["npm", "start"]
