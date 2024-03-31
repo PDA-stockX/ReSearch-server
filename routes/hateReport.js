@@ -11,7 +11,7 @@ router.get("/checkHate", async function (req, res, next) {
   try {
     const response = await models.DislikeReport.findOne({
       where: { userId: req.query.userId, reportId: req.query.reportId },
-    });
+    }); 
     // console.log(response);
     if (response == null) {
       res.json({ message: "fail" });
