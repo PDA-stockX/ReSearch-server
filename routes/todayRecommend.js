@@ -20,6 +20,23 @@ router.get("/getRecommend", async (req, res, next) => {
 
 router.get("/getTodayReport", async (req, res, next) => {
   try {
+    const reportArr = [1, 5, 7, 3];
+    const response = await models.Report.findAll({
+      include: { model: models.Firm, as: "firm" },
+      where: { id: reportArr },
+    });
+    console.log(response[0].dataValues);
+    const resList = [];
+    response.forEach((el) => {
+      resList.push({
+        id: el.dataValues.id,
+        stockName: el.dataValues.stockName,
+        title: el.dataValues.title,
+        firm: el.dataValues.firm.dataValues.name,
+        postedAt: el.dataValues.postedAt,
+      });
+    });
+    res.json(resList);
   } catch (err) {
     console.error(err);
   }
