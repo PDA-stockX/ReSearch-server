@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "cross-env NODE_ENV=local node ./bin/www",
-    "start:dev": "cross-env NODE_ENV=development node ./bin/www",
-    "dev": "cross-env NODE_ENV=local nodemon ./bin/www",
-    "dev:dev": "cross-env NODE_ENV=development node ./bin/www",
+    "start": "cross-env NODE_ENV=development node ./bin/www",
+    "start:prod": "cross-env NODE_ENV=production node ./bin/www",
+    "dev": "cross-env NODE_ENV=development nodemon ./bin/www",
+    "dev:prod": "cross-env NODE_ENV=production node ./bin/www",
     "test": "jest"
   },
   "dependencies": {

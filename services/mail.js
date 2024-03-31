@@ -1,5 +1,9 @@
 const nodemailer = require('nodemailer');
-require('dotenv').config();
+const path = require("path");
+require("dotenv").config({
+    path: path.resolve(__dirname, process.env.NODE_ENV === "production"
+        ? "../env/.env.production" : process.env.NODE_ENV === "development" ? "../env/.env.development" : "../env/.env"),
+});
 
 const transporter = nodemailer.createTransport({
     service: process.env.SMTP_SERVICE,
