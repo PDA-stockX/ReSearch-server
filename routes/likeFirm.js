@@ -1,11 +1,8 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
 
-const { initModels } = require("../models/initModels");
-const models = initModels();
-const { verifyToken } = require("../services/auth");
-const { authenticate } = require("../services/auth");
-/* GET home page. */
+const models = require("../models/index");
+const { verifyToken, authenticate } = require("../services/auth");
 
 router.get("/checkLikeNum", async function (req, res, next) {
   try {

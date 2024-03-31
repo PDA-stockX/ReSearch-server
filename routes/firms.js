@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { initModels } = require("../models/initModels");
 const sequelize = require("sequelize");
 const { Op } = require("sequelize");
-const firm = require("../models/firm");
-const models = initModels();
+
+const models = require("../models/index");
 
 // 증권사 조회 (by search keyword)
 router.get("/search", async (req, res, next) => {
