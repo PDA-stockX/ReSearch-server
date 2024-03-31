@@ -21,7 +21,7 @@ services:
       - server
       - redis
     restart: always
-  server:
+  api:
     image: pda/research-server
     build:
       context: .
