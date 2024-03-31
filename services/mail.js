@@ -14,7 +14,7 @@ const sendMail = (user, analysts) => {
         from : process.env.SMTP_USER,
         to: user.email,
         subject: '애널리스트 리포트 알림',
-        text: `안녕하세요 ${user.name}님, 즐겨찾기한 애널리스트의 리포트가 나왔어요!`
+        text: `안녕하세요 ${user.name}님, 즐겨찾기한 애널리스트의 리포트가 나왔어요! ${analysts.map(analyst => analyst.name).join(', ')}`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
