@@ -102,10 +102,13 @@ router.post("/", async (req, res, next) => {
       })
     );
 
+    await transaction.commit();
+
     res.status(201).json(report);
   } catch (err) {
     console.log(req.body);
     console.error(err);
+    await transaction.rollback();
     res.status(400).json({ message: "fail" });
     next(err);
   }
