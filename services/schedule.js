@@ -216,4 +216,4 @@ function setSchedule(time, ...callback) {
     });
 }
 
-module.exports = {updateReports, updateAnalysts, updateFirms, notifyUsersOfNewReports, setSchedule};
+module.exports = {updateReports, updateAnalysts, updateFirms, notifyUsersOfNewReports, updateTodayAnalysts, setSchedule};

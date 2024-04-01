@@ -94,7 +94,7 @@ router.post("/", async (req, res, next) => {
     await models.Report.associations.firm.set(report, firm);
 
     await models.ReportSector.bulkCreate(
-      reportSectorReq.map((sector) => {
+      reportSectorReq.stockName.map((sector) => {
         return {
           reportId: report.id,
           sectorName: sector,
