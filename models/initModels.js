@@ -48,6 +48,7 @@ function initModels(sequelize, dataTypes) {
     Follow,
     ReportSector,
     StockItem,
+    sequelize,
   };
 }
 
