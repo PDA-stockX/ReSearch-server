@@ -1,6 +1,7 @@
 const {calculateReturnRate, calculateAchievementScore} = require('./reports');
 const {sendMail} = require('./mail');
 const models = require('../models/index');
+const {redis} = require('../redis/redis');
 const schedule = require("node-schedule");
 const {startOfDay, endOfDay} = require("../utils/dateUtil");
 const {Op} = require("sequelize");
@@ -102,15 +103,7 @@ async function updateFirms() {
  */
 async function notifyUsersOfNewReports() {
     try {
-        // 오늘 작성된 리포트
-        const reports = await models.Report.findAll({
-            where: {
-                createdAt: {
-                    [Op.gte]: startOfDay(new Date()),
-                    [Op.lte]: endOfDay(new Date())
-                }
-            },
-        });
+        const reports = await getTodayReports();
 
         // 리포트를 작성한 애널리스트를 팔로우하는 사용자
         const follows = await models.Follow.findAll({
@@ -140,6 +133,52 @@ async function notifyUsersOfNewReports() {
     } catch (err) {
         console.error(err);
     }
+}
+
+async function updateTodayAnalysts() {
+    try {
+        const reports = await getTodayReports();
+
+        const analysts = [];
+        for (const report of reports) {
+            const analyst = await models.Analyst.findByPk(report.analystId);
+            analysts.push(analyst);
+        }
+
+        const scores = [];
+        for (const analyst of analysts) {
+            const countReports = await models.Report.count({
+                where: {
+                    analystId: analyst.id,
+                }
+            });
+
+            scores.push({
+                analystId: analyst.id,
+                score: analyst.achievementScore * 0.5
+                    + analyst.returnRate * 100 * 0.3
+                    + (Math.min(countReports, 20) / 20) * 100 * 0.2
+            });
+        }
+
+        scores.sort((a, b) => b.score - a.score);
+
+        const analystIds = scores.slice(0, 3).map(score => score.analystId);
+        redis.set("todayAnalystIds", JSON.stringify(analystIds));
+    } catch (err) {
+
+    }
+}
+
+async function getTodayReports() {
+    return await models.Report.findAll({
+        where: {
+            createdAt: {
+                [Op.gte]: startOfDay(new Date()),
+                [Op.lte]: endOfDay(new Date())
+            }
+        },
+    });
 }
 
 /**
