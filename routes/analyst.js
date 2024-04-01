@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const models = require("../models/index");
 
-
 router.get("/checkReport/:analId", async (req, res, next) => {
   try {
     const response = await models.Report.findAll({
@@ -52,7 +51,7 @@ router.get("/checkSector/:analId", async (req, res, next) => {
       b.num - a.num;
     });
     res.json(tempList[0]);
-    console.log(tempList);
+    // console.log(tempList);
   } catch (err) {
     throw err;
   }

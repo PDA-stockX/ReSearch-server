@@ -28,7 +28,7 @@ router.get("/search", async (req, res, next) => {
   }
 });
 
-router.get("/getDetail/:firmId", async (req, res, next) => {
+router.get("/detail/:firmId", async (req, res, next) => {
   try {
     console.log(req.params);
     const firms = await models.Firm.findOne({
@@ -55,11 +55,19 @@ router.post("/", async (req, res, next) => {
         attributes: ["returnRate", "achievementScore"],
       });
 
-      const totalReturnRate = reports.reduce((sum, report) => sum + report.returnRate, 0);
-      const totalAchievementScore = reports.reduce((sum, report) => sum + report.achievementScore, 0);
+      const totalReturnRate = reports.reduce(
+        (sum, report) => sum + report.returnRate,
+        0
+      );
+      const totalAchievementScore = reports.reduce(
+        (sum, report) => sum + report.achievementScore,
+        0
+      );
 
-      const averageReturnRate = reports.length > 0 ? totalReturnRate / reports.length : 0;
-      const averageAchievementScore = reports.length > 0 ? totalAchievementScore / reports.length : 0;
+      const averageReturnRate =
+        reports.length > 0 ? totalReturnRate / reports.length : 0;
+      const averageAchievementScore =
+        reports.length > 0 ? totalAchievementScore / reports.length : 0;
 
       await models.Firm.update(
         {
@@ -70,14 +78,14 @@ router.post("/", async (req, res, next) => {
           where: { id: firm.id },
         }
       );
-      res.send("firm updated")
+      res.send("firm updated");
     }
   } catch (err) {
     console.log(err);
     res.status(400).json({ message: "firm update fail" });
     next(err);
   }
-})
+});
 
 router.get("/return-rate", async (req, res, next) => {
   try {
@@ -86,7 +94,7 @@ router.get("/return-rate", async (req, res, next) => {
     });
 
     const result = firmData.sort((a, b) => b["returnRate"] - a["returnRate"]);
-    res.json(result)
+    res.json(result);
   } catch (error) {
     console.error("Error retrieving Return Rate", error);
   }
@@ -98,8 +106,10 @@ router.get("/achievement-score", async (req, res, next) => {
       attributes: ["id", "name", "achievementScore"],
     });
 
-    const result = firmData.sort((a, b) => b["achievementScore"] - a["achievementScore"]);
-    res.json(result)
+    const result = firmData.sort(
+      (a, b) => b["achievementScore"] - a["achievementScore"]
+    );
+    res.json(result);
   } catch (error) {
     console.error("Error retrieving Achievement Score", error);
   }
@@ -108,7 +118,9 @@ router.get("/achievement-score", async (req, res, next) => {
 router.get("/like-rank", async (req, res, next) => {
   try {
     const result = await models.Firm.findAll({
-      attributes: ["id", "name",
+      attributes: [
+        "id",
+        "name",
         [sequelize.fn("COUNT", sequelize.col("`likes`.userId")), "likeCount"],
       ],
       include: [
@@ -119,13 +131,13 @@ router.get("/like-rank", async (req, res, next) => {
         },
       ],
       group: ["Firm.id"],
-      order: [[sequelize.literal("likeCount"), "DESC"]]
+      order: [[sequelize.literal("likeCount"), "DESC"]],
     });
-    res.json(result)
+    res.json(result);
   } catch (err) {
     console.error("Error retrieving firm like rankings:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
-})
+});
 
 module.exports = router;

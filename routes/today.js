@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { getRankings } = require("../services/analysts");
 
-router.get("/getRecommend", async (req, res, next) => {
+router.get("/anals", async (req, res, next) => {
   try {
     //임시 오늘 리포트 애널리스트
     const analystIdArr = [3, 59, 107];
@@ -16,7 +16,7 @@ router.get("/getRecommend", async (req, res, next) => {
   }
 });
 
-router.get("/getTodayReport", async (req, res, next) => {
+router.get("/reports", async (req, res, next) => {
   try {
     const reportArr = [1, 5, 7, 3];
     const response = await models.Report.findAll({

@@ -4,11 +4,11 @@ const router = express.Router();
 const models = require("../models/index");
 const { verifyToken, authenticate } = require("../services/auth");
 
-router.get("/checkHate", async function (req, res, next) {
+router.get("/my", async function (req, res, next) {
   try {
-    const response = await models.DislikeReport.findOne({
+    const response = await models.LikeReport.findOne({
       where: { userId: req.query.userId, reportId: req.query.reportId },
-    }); 
+    });
     // console.log(response);
     if (response == null) {
       res.json({ message: "fail" });
@@ -19,35 +19,35 @@ router.get("/checkHate", async function (req, res, next) {
     throw err;
   }
 });
-router.get("/checkHateNum", async function (req, res, next) {
+router.get("/num", async function (req, res, next) {
   try {
-    const response = await models.DislikeReport.findAll({
+    const response = await models.LikeReport.findAll({
       where: { reportId: req.query.reportId },
     });
-    // console.log(response);
-    res.json({ hateNum: response.length });
+    console.log(response);
+    res.json({ likeNum: response.length });
   } catch (err) {
     throw err;
   }
 });
 
 router.use(authenticate);
-router.post("/hateReport", async function (req, res, next) {
+router.post("/like", async function (req, res, next) {
+  console.log(req.body);
   try {
-    const destoryResult = await models.LikeReport.destroy({
+    const destoryResult = await models.DislikeReport.destroy({
       where: { userId: req.body.userId, reportId: req.body.reportId },
     });
     console.log(destoryResult);
-    const reportLike = await models.DislikeReport.create({
+    const reportLike = await models.LikeReport.create({
       userId: req.body.userId,
       reportId: req.body.reportId,
     })
       .then(() => {
-        res.json({ massage: "success" });
+        res.json({ message: "success" });
       })
       .catch((err) => {
-        res.json({ message: fail });
-        throw err;
+        res.json({ message: "fail" });
       });
   } catch (err) {
     res.json({ message: "fail" });
@@ -55,9 +55,9 @@ router.post("/hateReport", async function (req, res, next) {
   }
 });
 
-router.post("/unHateReport", async function (req, res, next) {
+router.post("/un-like", async function (req, res, next) {
   try {
-    const destoryResult = await models.DislikeReport.destroy({
+    const destoryResult = await models.LikeReport.destroy({
       where: { userId: req.body.userId, reportId: req.body.reportId },
     })
       .then(() => res.json({ message: "success" }))
