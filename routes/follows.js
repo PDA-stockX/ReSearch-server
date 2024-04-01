@@ -4,7 +4,7 @@ const router = express.Router();
 const models = require("../models/index");
 const { verifyToken, authenticate } = require("../services/auth");
 
-router.get("/checkFollow", async function (req, res, next) {
+router.get("/my", async function (req, res, next) {
   const checkAnalyst = await models.Follow.findOne({
     where: {
       userId: req.query.userId,
@@ -21,20 +21,8 @@ router.get("/checkFollow", async function (req, res, next) {
 });
 router.use(authenticate);
 
-router.get("/checkMyAnal/:userId", async function (req, res, next) {
-  // try{
-  //   const analystList = await models.Analyst.findAll({
-  //     where:{
-  //       userId:req.params.userId,
-  //     }
-  //   }).then((data)=>{
-  //     console.log(data);
-  //     res.json
-  //   })
-  // }
-});
 /* GET home page. */
-router.post("/followAnal", async function (req, res, next) {
+router.post("/follows", async function (req, res, next) {
   // console.log(req);
   try {
     const analystList = await models.Follow.create({
@@ -48,7 +36,7 @@ router.post("/followAnal", async function (req, res, next) {
     throw err;
   }
 });
-router.post("/unFollowAnal", async function (req, res, next) {
+router.post("/un-follows", async function (req, res, next) {
   // console.log(req);
   const analystList = await models.Follow.destroy({
     where: { userId: req.user.id, analystId: req.body.analId },

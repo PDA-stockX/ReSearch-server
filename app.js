@@ -6,20 +6,25 @@ const logger = require("morgan");
 
 const usersRouter = require("./routes/users");
 const reportsRouter = require("./routes/reports");
-const analystRouter = require("./routes/analyst");
 const analystsRouter = require("./routes/analysts");
 const firmsRouter = require("./routes/firms");
-const followAnalRouter = require("./routes/followAnal");
-const likeReportRouter = require("./routes/likeReport");
-const hateReportRouter = require("./routes/hateReport");
-const likeFirmRouter = require("./routes/likeFirm");
-const hateFirmRouter = require("./routes/hateFirm");
-const bookmarkRouter = require("./routes/bookmark");
-const todayRecommendRouter = require("./routes/todayRecommend");
-const reportSectorRouter = require("./routes/reportSector");
+const followRouter = require("./routes/follows");
+const likeReportRouter = require("./routes/like-reports");
+const hateReportRouter = require("./routes/dislike-reports");
+const likeFirmRouter = require("./routes/like-firms");
+const hateFirmRouter = require("./routes/dislike-firms");
+const bookmarksRouter = require("./routes/bookmarks");
+const todayRouter = require("./routes/today");
+const reportSectorRouter = require("./routes/reportSectors");
 const app = express();
 const cors = require("cors");
-const {setSchedule, updateReports, updateAnalysts, updateFirms, notifyUsersOfNewReports} = require("./services/schedule");
+const {
+  setSchedule,
+  updateReports,
+  updateAnalysts,
+  updateFirms,
+  notifyUsersOfNewReports,
+} = require("./services/schedule");
 app.use(cors({ origin: "*" }));
 
 app.use(logger("dev"));
@@ -30,17 +35,16 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/users", usersRouter);
 app.use("/reports", reportsRouter);
-app.use("/analyst", analystRouter);
 app.use("/firms", firmsRouter);
-app.use("/followAnal", followAnalRouter);
-app.use("/likeReport", likeReportRouter);
-app.use("/hateReport", hateReportRouter);
-app.use("/bookmark", bookmarkRouter);
+app.use("/follows", followRouter);
+app.use("/like-reports", likeReportRouter);
+app.use("/dislike-reports", hateReportRouter);
+app.use("/bookmarks", bookmarksRouter);
 app.use("/analysts", analystsRouter);
 app.use("/reportSector", reportSectorRouter);
-app.use("/likeFirm", likeFirmRouter);
-app.use("/hateFirm", hateFirmRouter);
-app.use("/todayRecommend", todayRecommendRouter);
+app.use("/like-firms", likeFirmRouter);
+app.use("/dislike-firms", hateFirmRouter);
+app.use("/today", todayRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -59,6 +63,12 @@ app.use(function (err, req, res, next) {
 });
 
 // 매일 오전 10시 15분에 리포트, 애널리스트, 증권사 업데이트, 새 리포트 알림
-setSchedule({hour: 10, minute: 15}, updateReports, updateAnalysts, updateFirms, notifyUsersOfNewReports);
+setSchedule(
+  { hour: 10, minute: 15 },
+  updateReports,
+  updateAnalysts,
+  updateFirms,
+  notifyUsersOfNewReports
+);
 
 module.exports = app;

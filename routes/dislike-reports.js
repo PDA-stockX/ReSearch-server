@@ -4,7 +4,7 @@ const router = express.Router();
 const models = require("../models/index");
 const { verifyToken, authenticate } = require("../services/auth");
 
-router.get("/checkHate", async function (req, res, next) {
+router.get("/my", async function (req, res, next) {
   try {
     const response = await models.DislikeReport.findOne({
       where: { userId: req.query.userId, reportId: req.query.reportId },
@@ -19,7 +19,8 @@ router.get("/checkHate", async function (req, res, next) {
     throw err;
   }
 });
-router.get("/checkHateNum", async function (req, res, next) {
+
+router.get("/num", async function (req, res, next) {
   try {
     const response = await models.DislikeReport.findAll({
       where: { reportId: req.query.reportId },
@@ -32,7 +33,7 @@ router.get("/checkHateNum", async function (req, res, next) {
 });
 
 router.use(authenticate);
-router.post("/hateReport", async function (req, res, next) {
+router.post("/dislike", async function (req, res, next) {
   try {
     const destoryResult = await models.LikeReport.destroy({
       where: { userId: req.body.userId, reportId: req.body.reportId },
@@ -55,7 +56,7 @@ router.post("/hateReport", async function (req, res, next) {
   }
 });
 
-router.post("/unHateReport", async function (req, res, next) {
+router.post("/un-dislike", async function (req, res, next) {
   try {
     const destoryResult = await models.DislikeReport.destroy({
       where: { userId: req.body.userId, reportId: req.body.reportId },

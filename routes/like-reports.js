@@ -4,7 +4,7 @@ const router = express.Router();
 const models = require("../models/index");
 const { verifyToken, authenticate } = require("../services/auth");
 
-router.get("/checkLike", async function (req, res, next) {
+router.get("/my", async function (req, res, next) {
   try {
     const response = await models.LikeReport.findOne({
       where: { userId: req.query.userId, reportId: req.query.reportId },
@@ -19,12 +19,12 @@ router.get("/checkLike", async function (req, res, next) {
     throw err;
   }
 });
-router.get("/checkLikeNum", async function (req, res, next) {
+router.get("/num", async function (req, res, next) {
   try {
     const response = await models.LikeReport.findAll({
       where: { reportId: req.query.reportId },
     });
-    // console.log(response);
+    console.log(response);
     res.json({ likeNum: response.length });
   } catch (err) {
     throw err;
@@ -32,7 +32,7 @@ router.get("/checkLikeNum", async function (req, res, next) {
 });
 
 router.use(authenticate);
-router.post("/likeReport", async function (req, res, next) {
+router.post("/like", async function (req, res, next) {
   console.log(req.body);
   try {
     const destoryResult = await models.DislikeReport.destroy({
@@ -55,7 +55,7 @@ router.post("/likeReport", async function (req, res, next) {
   }
 });
 
-router.post("/unLikeReport", async function (req, res, next) {
+router.post("/un-like", async function (req, res, next) {
   try {
     const destoryResult = await models.LikeReport.destroy({
       where: { userId: req.body.userId, reportId: req.body.reportId },

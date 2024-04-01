@@ -22,7 +22,7 @@ const getRankings = async (analystIdArr) => {
       analystName: "",
     });
   });
-  //   console.log(analystArr);
+  // console.log(analystArr);
   try {
     const response = await models.Report.findAll({
       // attributes: [
@@ -45,7 +45,7 @@ const getRankings = async (analystIdArr) => {
         ],
       },
     });
-    console.log(response);
+    // console.log(response);
     // console.log(response);
     response.forEach((e) => {
       // console.log(e);

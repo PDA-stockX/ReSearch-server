@@ -6,7 +6,7 @@ const { verifyToken, authenticate } = require("../services/auth");
 
 router.use(authenticate);
 
-router.get("/myAnal", async function (req, res, next) {
+router.get("/my-anal", async function (req, res, next) {
   console.log(req.header);
   try {
     const myAnalList = await models.Follow.findAll({
@@ -21,7 +21,7 @@ router.get("/myAnal", async function (req, res, next) {
   // res.json({ message: "fail" });
 });
 
-router.get("/myReport", async function (req, res, next) {
+router.get("/my-report", async function (req, res, next) {
   // console.log(req.body);
   // console.log(req);
   try {
