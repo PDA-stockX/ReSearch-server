@@ -7,8 +7,9 @@ const config = {
 };
 
 const getStockPriceInfo = async (ticker, date) => {
+    let response
     try {
-        const response = await axios.get(`${process.env.OPEN_API_URL}/getStockPriceInfo`
+        response = await axios.get(`${process.env.OPEN_API_URL}/getStockPriceInfo`
             + `?serviceKey=${process.env.OPEN_API_KEY}`
             + `&likeSrtnCd=${ticker}&basDt=${date}&resultType=json`, config);
         return response.data.response.body.items.item[0];

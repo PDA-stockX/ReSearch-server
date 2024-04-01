@@ -42,6 +42,8 @@ router.get("/", async (req, res, next) => {
 
 // 리포트 생성 (현재 시점으로부터 1년 이전 데이터만 수익률/달성점수 계산)
 router.post("/", async (req, res, next) => {
+    const transaction = await models.sequelize.transaction();
+
     try {
         const reportReq = req.body.report;
         const analystReq = req.body.analyst;
@@ -89,7 +91,7 @@ router.post("/", async (req, res, next) => {
         await models.Report.associations.firm.set(report, firm);
 
         await models.ReportSector.bulkCreate(
-            reportSectorReq.map((sector) => {
+            reportSectorReq.sectorName.map((sector) => {
                 return {
                     reportId: report.id,
                     sectorName: sector,
@@ -97,11 +99,19 @@ router.post("/", async (req, res, next) => {
             })
         );
 
+        // await models.ReportSector.create({
+        //     reportId: report.id,
+        //     sectorName: reportSectorReq.sectorName,
+        // })
+
+        await transaction.commit();
+
         res.status(201).json(report);
 
     } catch (err) {
         console.log(req.body);
         console.error(err);
+        await transaction.rollback();
         res.status(400).json({message: "fail"});
         next(err);
     }

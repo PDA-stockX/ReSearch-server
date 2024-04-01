@@ -12,11 +12,16 @@ async function saveReports() {
     const parsedReportSectorsData = JSON.parse(reportSectorsData);
 
     for (let i = 0; i < parsedAnalystData.length; i++) {
-        await axios.post('http://localhost:3000/reports', {
-            analyst: parsedAnalystData[i],
-            report: parsedReportData[i],
-            reportSector: parsedReportSectorsData[i]
-        });
+        try {
+            await axios.post('http://localhost:3000/reports', {
+                analyst: parsedAnalystData[i],
+                report: parsedReportData[i],
+                reportSector: parsedReportSectorsData[i]
+            });
+        } catch (error) {
+            console.error(`Error on iteration ${i}:`, error);
+        }
+
     }
 }
 
